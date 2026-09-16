@@ -360,7 +360,7 @@
   .modal {
     background: var(--bg); border-radius: var(--radius-l); border: 1px solid var(--border);
     width: 100%; max-width: 420px; padding: 24px; display: flex; flex-direction: column; gap: 14px;
-    max-height: 88vh; overflow-y: auto;
+    max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
   }
   .modal-head { display: flex; align-items: center; justify-content: space-between; }
   .modal h3 { font-size: 1.15rem; margin: 0; }
@@ -469,8 +469,13 @@
   .compare-bar-actions .btn-primary { background: #fff; color: var(--primary-dark); }
   .compare-bar-actions .btn-primary:disabled { opacity: 0.5; }
   .compare-bar-actions .btn-ghost { background: rgba(255,255,255,0.15); color: #fff; border-color: transparent; }
-  .compare-btn.active { border-color: var(--primary); }
-  .compare-btn.active svg { stroke: var(--primary); }
+  .compare-chip {
+    display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--bg); color: var(--muted); font-size: 0.7rem; font-weight: 700;
+    white-space: nowrap;
+  }
+  .compare-chip svg { width: 12px; height: 12px; }
+  .compare-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
   .compare-modal { max-width: 720px; }
   .compare-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
   .compare-table th, .compare-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: center; vertical-align: top; }
@@ -478,7 +483,7 @@
   .compare-table img { width: 100%; max-width: 140px; height: 90px; object-fit: cover; border-radius: var(--radius-s); }
   .compare-table td.diff { color: var(--primary-dark); font-weight: 800; }
   .compare-empty { font-size: 0.85rem; color: var(--muted); text-align: center; padding: 20px 0; }
-  .detail-body { flex: 1; overflow-y: auto; padding: 22px 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+  .detail-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 22px 24px 28px; display: flex; flex-direction: column; gap: 16px; }
   @media (min-width: 720px) {
     .detail-panel { flex-direction: row; }
     .detail-media { width: 42%; height: auto; }
@@ -1461,7 +1466,7 @@
     var trustedHtml = isTrustedSeller(item.seller) ? '<span class="trusted-badge">' + CHECK_BADGE_SVG + 'موثوق</span>' : '';
     var featuredDaysHtml = (state.view === 'mine' && featured) ? '<span>' + STAR_SVG + 'متبقي ' + getFeaturedDaysLeft(item) + ' يوم</span>' : '';
     var isComparing = compareSelection.indexOf(item.id) !== -1;
-    var compareHtml = '<button class="fav-btn compare-btn' + (isComparing ? ' active' : '') + '" data-compare="' + item.id + '" aria-label="' + (isComparing ? 'إزالة من المقارنة' : 'أضف للمقارنة') + '" title="مقارنة">' + COMPARE_SVG + '</button>';
+    var compareHtml = '<button type="button" class="compare-chip' + (isComparing ? ' active' : '') + '" data-compare="' + item.id + '" aria-label="' + (isComparing ? 'إزالة من المقارنة' : 'أضف إلى المقارنة') + '">' + COMPARE_SVG + '<span>' + (isComparing ? 'يُقارَن ✓' : 'قارن') + '</span></button>';
     return (
       '<article class="feed-row' + (item.status === 'sold' ? ' is-sold' : '') + (expired ? ' is-expired' : '') + (featured ? ' is-featured' : '') + '" data-id="' + item.id + '" tabindex="0" role="button" aria-label="عرض تفاصيل: ' + item.title + '، ' + fmtPrice(item.price) + '">' +
         '<div class="feed-thumb">' + (photo ? '<img src="' + photo + '" alt="" loading="lazy">' : icon) + '<span class="card-badge">' + badge + '</span></div>' +
@@ -1992,6 +1997,29 @@
 
   var FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+  var openModalCount = 0;
+  var bodyScrollY = 0;
+
+  function lockBodyScroll() {
+    openModalCount++;
+    if (openModalCount !== 1) return;
+    bodyScrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + bodyScrollY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+  }
+
+  function unlockBodyScroll() {
+    openModalCount = Math.max(0, openModalCount - 1);
+    if (openModalCount !== 0) return;
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    window.scrollTo(0, bodyScrollY);
+  }
+
   function setupModalA11y(id) {
     var el = document.getElementById(id);
     if (!el) return;
@@ -2014,6 +2042,7 @@
 
     new MutationObserver(function () {
       if (!el.hidden) {
+        lockBodyScroll();
         lastFocused = document.activeElement;
         el.addEventListener('keydown', onKeydown);
         window.setTimeout(function () {
@@ -2021,6 +2050,7 @@
           (focusable[0] || el).focus();
         }, 0);
       } else {
+        unlockBodyScroll();
         el.removeEventListener('keydown', onKeydown);
         if (lastFocused && typeof lastFocused.focus === 'function' && document.contains(lastFocused)) {
           lastFocused.focus();
