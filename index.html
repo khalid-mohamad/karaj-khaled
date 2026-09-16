@@ -259,6 +259,7 @@
   }
   .feed-row:hover { background: var(--surface-2); }
   .feed-row { cursor: pointer; }
+  .feed-row:focus-visible, .similar-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   .feed-thumb {
     position: relative; flex-shrink: 0; width: 92px; height: 92px; border-radius: var(--radius-m);
     background: var(--surface-2); display: flex; align-items: center; justify-content: center; overflow: hidden;
@@ -425,6 +426,58 @@
   .detail-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
   .detail-dots .dot { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: rgba(255,255,255,0.55); }
   .detail-dots .dot.active { background: #fff; }
+  .zoom-hint-btn {
+    position: absolute; bottom: 10px; inset-inline-end: 10px; z-index: 3;
+    width: 32px; height: 32px; border-radius: 50%; border: none; cursor: zoom-in;
+    background: rgba(10,20,15,0.55); color: #fff; display: flex; align-items: center; justify-content: center;
+  }
+  .zoom-hint-btn svg { width: 17px; height: 17px; }
+  #detailMediaWrap { cursor: zoom-in; }
+
+  /* ---------- Lightbox ---------- */
+  .lightbox-backdrop {
+    position: fixed; inset: 0; background: rgba(5, 10, 8, 0.92); z-index: 200;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .lightbox-backdrop[hidden] { display: none; }
+  .lightbox-backdrop img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: var(--radius-s); }
+  .lightbox-close {
+    position: absolute; top: 16px; inset-inline-end: 18px; background: rgba(255,255,255,0.12); border: none;
+    color: #fff; font-size: 1.6rem; line-height: 1; width: 42px; height: 42px; border-radius: 50%;
+  }
+  .lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.12); border: none;
+    color: #fff; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  }
+  .lightbox-nav svg { width: 22px; height: 22px; }
+  .lightbox-prev { inset-inline-start: 16px; }
+  .lightbox-next { inset-inline-end: 16px; }
+  .lightbox-counter {
+    position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+    color: #fff; font-size: 0.8rem; background: rgba(255,255,255,0.12); padding: 4px 12px; border-radius: 999px;
+  }
+
+  /* ---------- Compare ---------- */
+  .compare-bar {
+    position: fixed; bottom: 0; inset-inline: 0; z-index: 90; background: var(--primary-dark); color: #fff;
+    padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
+  }
+  .compare-bar[hidden] { display: none; }
+  .compare-bar span { font-size: 0.85rem; font-weight: 700; }
+  .compare-bar-actions { display: flex; gap: 8px; }
+  .compare-bar-actions .btn-primary { background: #fff; color: var(--primary-dark); }
+  .compare-bar-actions .btn-primary:disabled { opacity: 0.5; }
+  .compare-bar-actions .btn-ghost { background: rgba(255,255,255,0.15); color: #fff; border-color: transparent; }
+  .compare-btn.active { border-color: var(--primary); }
+  .compare-btn.active svg { stroke: var(--primary); }
+  .compare-modal { max-width: 720px; }
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .compare-table th, .compare-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: center; vertical-align: top; }
+  .compare-table th:first-child, .compare-table td:first-child { text-align: start; color: var(--muted); font-weight: 600; width: 30%; }
+  .compare-table img { width: 100%; max-width: 140px; height: 90px; object-fit: cover; border-radius: var(--radius-s); }
+  .compare-table td.diff { color: var(--primary-dark); font-weight: 800; }
+  .compare-empty { font-size: 0.85rem; color: var(--muted); text-align: center; padding: 20px 0; }
   .detail-body { flex: 1; overflow-y: auto; padding: 22px 24px 28px; display: flex; flex-direction: column; gap: 16px; }
   @media (min-width: 720px) {
     .detail-panel { flex-direction: row; }
@@ -671,7 +724,7 @@
     </div>
   </footer>
 
-  <div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal-backdrop" id="modalBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
     <div class="modal">
       <div class="modal-head">
         <h3 id="modalTitle">أضف إعلانك</h3>
@@ -720,10 +773,10 @@
     </div>
   </div>
 
-  <div class="modal-backdrop" id="reportBackdrop" hidden>
+  <div class="modal-backdrop" id="reportBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="reportTitle" tabindex="-1">
     <div class="modal">
       <div class="modal-head">
-        <h3>الإبلاغ عن إعلان</h3>
+        <h3 id="reportTitle">الإبلاغ عن إعلان</h3>
         <button class="modal-close" id="closeReportBtn" type="button" aria-label="إغلاق">×</button>
       </div>
       <form id="reportForm">
@@ -746,7 +799,7 @@
     </div>
   </div>
 
-  <div class="modal-backdrop" id="authBackdrop" hidden>
+  <div class="modal-backdrop" id="authBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="authTitle" tabindex="-1">
     <div class="modal">
       <div class="modal-head">
         <h3 id="authTitle">تسجيل الدخول</h3>
@@ -771,10 +824,10 @@
     </div>
   </div>
 
-  <div class="modal-backdrop" id="shareBackdrop" hidden>
+  <div class="modal-backdrop" id="shareBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle" tabindex="-1">
     <div class="modal share-modal">
       <div class="modal-head">
-        <h3>مشاركة الإعلان</h3>
+        <h3 id="shareTitle">مشاركة الإعلان</h3>
         <button class="modal-close" id="closeShareBtn" type="button" aria-label="إغلاق">×</button>
       </div>
       <div class="share-options">
@@ -804,10 +857,10 @@
     </div>
   </div>
 
-  <div class="modal-backdrop" id="accountBackdrop" hidden>
+  <div class="modal-backdrop" id="accountBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="accountTitle" tabindex="-1">
     <div class="modal">
       <div class="modal-head">
-        <h3>حسابي</h3>
+        <h3 id="accountTitle">حسابي</h3>
         <button class="modal-close" id="closeAccountBtn" type="button" aria-label="إغلاق">×</button>
       </div>
       <div class="seller-row">
@@ -823,7 +876,7 @@
     </div>
   </div>
 
-  <div class="modal-backdrop" id="infoBackdrop" hidden>
+  <div class="modal-backdrop" id="infoBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="infoTitle" tabindex="-1">
     <div class="modal">
       <div class="modal-head">
         <h3 id="infoTitle"></h3>
@@ -833,10 +886,10 @@
     </div>
   </div>
 
-  <div class="modal-backdrop" id="paymentBackdrop" hidden>
+  <div class="modal-backdrop" id="paymentBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="paymentTitle" tabindex="-1">
     <div class="modal">
       <div class="modal-head">
-        <h3>ترقية الإعلان</h3>
+        <h3 id="paymentTitle">ترقية الإعلان</h3>
         <button class="modal-close" id="closePaymentBtn" type="button" aria-label="إغلاق">×</button>
       </div>
       <div class="promo-plan">
@@ -868,12 +921,15 @@
     </div>
   </div>
 
-  <div class="modal-backdrop" id="detailBackdrop" hidden>
+  <div class="modal-backdrop" id="detailBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="detailTitle" tabindex="-1">
     <div class="detail-panel">
       <button class="detail-close" id="closeDetailBtn" type="button" aria-label="إغلاق">×</button>
-      <div class="detail-media">
+      <div class="detail-media" id="detailMediaWrap">
         <div id="detailMedia"></div>
         <div class="detail-dots" id="detailDots" hidden></div>
+        <button type="button" class="zoom-hint-btn" id="zoomHintBtn" aria-label="تكبير الصورة" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M11 8v6M8 11h6M21 21l-4.3-4.3"></path></svg>
+        </button>
       </div>
       <div class="detail-body">
         <span class="card-badge" id="detailBadge" style="align-self:flex-start;"></span>
@@ -931,7 +987,37 @@
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="lightbox-backdrop" id="lightboxBackdrop" hidden role="dialog" aria-modal="true" aria-label="عرض الصورة بالحجم الكامل" tabindex="-1">
+    <button type="button" class="lightbox-close" id="closeLightboxBtn" aria-label="إغلاق">×</button>
+    <button type="button" class="lightbox-nav lightbox-prev" id="lightboxPrevBtn" aria-label="الصورة السابقة" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+    </button>
+    <img id="lightboxImg" src="" alt="">
+    <button type="button" class="lightbox-nav lightbox-next" id="lightboxNextBtn" aria-label="الصورة التالية" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+    </button>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+  </div>
+
+  <div class="compare-bar" id="compareBar" hidden>
+    <span id="compareBarText"></span>
+    <div class="compare-bar-actions">
+      <button type="button" class="btn btn-primary" id="compareNowBtn" disabled>قارن الآن</button>
+      <button type="button" class="btn btn-ghost" id="compareClearBtn">إلغاء</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="compareBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="compareTitle" tabindex="-1">
+    <div class="modal compare-modal">
+      <div class="modal-head">
+        <h3 id="compareTitle">مقارنة الإعلانات</h3>
+        <button class="modal-close" id="closeCompareBtn" type="button" aria-label="إغلاق">×</button>
+      </div>
+      <div id="compareBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
 
 <script>
@@ -964,6 +1050,7 @@
   var RENEW_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.3-6.4L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-15.3 6.4L3 16"></path><path d="M3 21v-5h5"></path></svg>';
   var CHECK_BADGE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 2.1 3.1-.5 1 3 2.9 1.3-.9 3.1 1.5 2.8-2.5 2 .1 3.2-3.1.6-1.7 2.7-3-1.1-3 1.1-1.7-2.7-3.1-.6.1-3.2-2.5-2 1.5-2.8-.9-3.1 2.9-1.3 1-3 3.1.5z"></path><path d="M9 12.5l2 2 4-4.5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
   var STAR_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6-5.9-3.3-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"></path></svg>';
+  var COMPARE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v18"></path><path d="M16 3v18"></path><path d="M3 8l5-5 5 5"></path><path d="M21 16l-5 5-5-5"></path></svg>';
   var CARD_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg>';
   var SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8"></path></svg>';
   var MOON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"></path></svg>';
@@ -1081,6 +1168,7 @@
   }
 
   var state = { cat: 'all', query: '', city: null, brand: null, year: null, min: null, max: null, rooms: null, plateType: null, sort: 'newest', favs: {}, view: 'browse', visibleCount: PAGE_SIZE };
+  var compareSelection = [];
   var userListings = [];
 
   function loadStorage() {
@@ -1372,8 +1460,10 @@
       : '<button class="fav-btn' + (isFav ? ' active' : '') + '" data-fav="' + item.id + '" aria-label="أضف للمفضلة">' + HEART_SVG + '</button>';
     var trustedHtml = isTrustedSeller(item.seller) ? '<span class="trusted-badge">' + CHECK_BADGE_SVG + 'موثوق</span>' : '';
     var featuredDaysHtml = (state.view === 'mine' && featured) ? '<span>' + STAR_SVG + 'متبقي ' + getFeaturedDaysLeft(item) + ' يوم</span>' : '';
+    var isComparing = compareSelection.indexOf(item.id) !== -1;
+    var compareHtml = '<button class="fav-btn compare-btn' + (isComparing ? ' active' : '') + '" data-compare="' + item.id + '" aria-label="' + (isComparing ? 'إزالة من المقارنة' : 'أضف للمقارنة') + '" title="مقارنة">' + COMPARE_SVG + '</button>';
     return (
-      '<article class="feed-row' + (item.status === 'sold' ? ' is-sold' : '') + (expired ? ' is-expired' : '') + (featured ? ' is-featured' : '') + '" data-id="' + item.id + '">' +
+      '<article class="feed-row' + (item.status === 'sold' ? ' is-sold' : '') + (expired ? ' is-expired' : '') + (featured ? ' is-featured' : '') + '" data-id="' + item.id + '" tabindex="0" role="button" aria-label="عرض تفاصيل: ' + item.title + '، ' + fmtPrice(item.price) + '">' +
         '<div class="feed-thumb">' + (photo ? '<img src="' + photo + '" alt="" loading="lazy">' : icon) + '<span class="card-badge">' + badge + '</span></div>' +
         '<div class="feed-main">' +
           '<div class="feed-title"><span class="feed-title-text">' + item.title + '</span>' + featuredHtml + expiredHtml + statusHtml + '</div>' +
@@ -1387,6 +1477,7 @@
         '</div>' +
         '<div class="feed-side">' +
           mineActions +
+          compareHtml +
           '<div class="feed-price">' + fmtPrice(item.price) + '</div>' +
         '</div>' +
       '</article>'
@@ -1461,6 +1552,13 @@
       });
     });
 
+    Array.prototype.forEach.call(grid.querySelectorAll('[data-compare]'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleCompareSelection(btn.getAttribute('data-compare'));
+      });
+    });
+
     Array.prototype.forEach.call(grid.querySelectorAll('[data-promote]'), function (btn) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -1514,6 +1612,91 @@
         render();
       });
     });
+
+    updateCompareBar();
+  }
+
+  function toggleCompareSelection(id) {
+    var idx = compareSelection.indexOf(id);
+    if (idx !== -1) {
+      compareSelection.splice(idx, 1);
+      render();
+      return;
+    }
+    var item = allData().find(function (i) { return i.id === id; });
+    if (!item) return;
+    if (compareSelection.length > 0) {
+      var first = allData().find(function (i) { return i.id === compareSelection[0]; });
+      if (first && first.cat !== item.cat) {
+        showToast('اختر إعلانًا من نفس الفئة للمقارنة');
+        return;
+      }
+    }
+    if (compareSelection.length >= 2) compareSelection.shift();
+    compareSelection.push(id);
+    render();
+  }
+
+  function updateCompareBar() {
+    var bar = document.getElementById('compareBar');
+    var text = document.getElementById('compareBarText');
+    var nowBtn = document.getElementById('compareNowBtn');
+    if (!compareSelection.length) { bar.hidden = true; return; }
+    bar.hidden = false;
+    text.textContent = compareSelection.length === 1 ? 'اختر إعلانًا آخر من نفس الفئة للمقارنة (1/2)' : 'جاهز للمقارنة بين إعلانين (2/2)';
+    nowBtn.disabled = compareSelection.length !== 2;
+  }
+
+  function specRows(item) {
+    var rows = [];
+    if (item.year) rows.push(['السنة', item.year]);
+    if (item.rooms) rows.push(['عدد الغرف', item.rooms]);
+    if (item.plateType) rows.push(['نوع اللوحة', item.plateType]);
+    if (item.specs && item.specs.length) rows.push(['المواصفات', item.specs.join('، ')]);
+    return rows;
+  }
+
+  function renderCompareModal() {
+    var body = document.getElementById('compareBody');
+    if (compareSelection.length !== 2) {
+      body.innerHTML = '<p class="compare-empty">اختر إعلانين من نفس الفئة أولًا لعرض المقارنة.</p>';
+      return;
+    }
+    var a = allData().find(function (i) { return i.id === compareSelection[0]; });
+    var b = allData().find(function (i) { return i.id === compareSelection[1]; });
+    if (!a || !b) {
+      body.innerHTML = '<p class="compare-empty">تعذر تحميل بيانات أحد الإعلانين.</p>';
+      return;
+    }
+    var photoA = a.photos && a.photos[0];
+    var photoB = b.photos && b.photos[0];
+    var rowsA = specRows(a);
+    var rowsB = specRows(b);
+    var labels = [];
+    rowsA.forEach(function (r) { if (labels.indexOf(r[0]) === -1) labels.push(r[0]); });
+    rowsB.forEach(function (r) { if (labels.indexOf(r[0]) === -1) labels.push(r[0]); });
+    function valueFor(rows, label) {
+      var found = rows.find(function (r) { return r[0] === label; });
+      return found ? found[1] : '—';
+    }
+    var priceDiff = a.price !== b.price;
+    var html = '<table class="compare-table">';
+    html += '<tr><td></td><td>' + (photoA ? '<img src="' + photoA + '" alt="">' : iconForCat(a.cat)) + '</td><td>' + (photoB ? '<img src="' + photoB + '" alt="">' : iconForCat(b.cat)) + '</td></tr>';
+    html += '<tr><td>الإعلان</td><td>' + a.title + '</td><td>' + b.title + '</td></tr>';
+    html += '<tr><td>السعر</td><td' + (priceDiff ? ' class="diff"' : '') + '>' + fmtPrice(a.price) + '</td><td' + (priceDiff ? ' class="diff"' : '') + '>' + fmtPrice(b.price) + '</td></tr>';
+    html += '<tr><td>المدينة</td><td>' + a.city + '</td><td>' + b.city + '</td></tr>';
+    if (a.brand || b.brand) html += '<tr><td>البراند</td><td>' + (a.brand || '—') + '</td><td>' + (b.brand || '—') + '</td></tr>';
+    labels.forEach(function (label) {
+      html += '<tr><td>' + label + '</td><td>' + valueFor(rowsA, label) + '</td><td>' + valueFor(rowsB, label) + '</td></tr>';
+    });
+    html += '<tr><td>المشاهدات</td><td>' + getViewCount(a) + '</td><td>' + getViewCount(b) + '</td></tr>';
+    html += '</table>';
+    body.innerHTML = html;
+  }
+
+  function openCompareModal() {
+    renderCompareModal();
+    document.getElementById('compareBackdrop').hidden = false;
   }
 
   function renderViewBanner(count) {
@@ -1574,6 +1757,7 @@
     var media = document.getElementById('detailMedia');
     var photo = detailGalleryPhotos[detailGalleryIndex];
     media.innerHTML = photo ? '<img src="' + photo + '" alt="">' : '';
+    document.getElementById('zoomHintBtn').hidden = !photo;
     var dots = document.getElementById('detailDots');
     if (detailGalleryPhotos.length > 1) {
       dots.innerHTML = detailGalleryPhotos.map(function (_, i) {
@@ -1591,6 +1775,49 @@
       dots.innerHTML = '';
     }
   }
+
+  function renderLightbox() {
+    var photo = detailGalleryPhotos[detailGalleryIndex];
+    if (!photo) return;
+    document.getElementById('lightboxImg').src = photo;
+    var multi = detailGalleryPhotos.length > 1;
+    document.getElementById('lightboxPrevBtn').hidden = !multi;
+    document.getElementById('lightboxNextBtn').hidden = !multi;
+    var counter = document.getElementById('lightboxCounter');
+    if (multi) {
+      counter.hidden = false;
+      counter.textContent = (detailGalleryIndex + 1) + ' / ' + detailGalleryPhotos.length;
+    } else {
+      counter.hidden = true;
+      counter.textContent = '';
+    }
+  }
+
+  function openLightbox() {
+    if (!detailGalleryPhotos.length) return;
+    renderLightbox();
+    document.getElementById('lightboxBackdrop').hidden = false;
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightboxBackdrop').hidden = true;
+    renderDetailMedia();
+  }
+
+  document.getElementById('detailMediaWrap').addEventListener('click', openLightbox);
+  document.getElementById('zoomHintBtn').addEventListener('click', function (e) { e.stopPropagation(); openLightbox(); });
+  document.getElementById('closeLightboxBtn').addEventListener('click', closeLightbox);
+  document.getElementById('lightboxBackdrop').addEventListener('click', function (e) {
+    if (e.target.id === 'lightboxBackdrop') closeLightbox();
+  });
+  document.getElementById('lightboxPrevBtn').addEventListener('click', function () {
+    detailGalleryIndex = (detailGalleryIndex - 1 + detailGalleryPhotos.length) % detailGalleryPhotos.length;
+    renderLightbox();
+  });
+  document.getElementById('lightboxNextBtn').addEventListener('click', function () {
+    detailGalleryIndex = (detailGalleryIndex + 1) % detailGalleryPhotos.length;
+    renderLightbox();
+  });
 
   var pendingPhotos = [];
 
@@ -1676,7 +1903,7 @@
     strip.innerHTML = similar.map(function (i) {
       var photo = i.photos && i.photos[0];
       return (
-        '<article class="similar-card" data-similar-id="' + i.id + '">' +
+        '<article class="similar-card" data-similar-id="' + i.id + '" tabindex="0" role="button" aria-label="عرض: ' + i.title + '">' +
           '<div class="similar-thumb">' + (photo ? '<img src="' + photo + '" alt="">' : iconForCat(i.cat)) + '</div>' +
           '<div class="similar-body">' +
             '<div class="similar-title">' + i.title + '</div>' +
@@ -1690,6 +1917,11 @@
         var id = card.getAttribute('data-similar-id');
         var found = allData().find(function (i) { return i.id === id; });
         if (found) openDetail(found);
+      });
+      card.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        card.click();
       });
     });
   }
@@ -1758,12 +1990,56 @@
     }
   }
 
+  var FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  function setupModalA11y(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var lastFocused = null;
+
+    function getFocusable() {
+      return Array.prototype.filter.call(el.querySelectorAll(FOCUSABLE_SELECTOR), function (n) {
+        return n.offsetParent !== null;
+      });
+    }
+
+    function onKeydown(e) {
+      if (e.key !== 'Tab') return;
+      var focusable = getFocusable();
+      if (!focusable.length) return;
+      var first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+
+    new MutationObserver(function () {
+      if (!el.hidden) {
+        lastFocused = document.activeElement;
+        el.addEventListener('keydown', onKeydown);
+        window.setTimeout(function () {
+          var focusable = getFocusable();
+          (focusable[0] || el).focus();
+        }, 0);
+      } else {
+        el.removeEventListener('keydown', onKeydown);
+        if (lastFocused && typeof lastFocused.focus === 'function' && document.contains(lastFocused)) {
+          lastFocused.focus();
+        }
+        lastFocused = null;
+      }
+    }).observe(el, { attributes: true, attributeFilter: ['hidden'] });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     loadStorage();
     buildBrandStrip();
     populateCitySelect();
     populateYearSelect();
     updateAuthBtn();
+    [
+      'modalBackdrop', 'reportBackdrop', 'authBackdrop', 'shareBackdrop', 'accountBackdrop',
+      'infoBackdrop', 'paymentBackdrop', 'detailBackdrop', 'lightboxBackdrop', 'compareBackdrop'
+    ].forEach(setupModalA11y);
     var initialTheme = getEffectiveTheme();
     var storedTheme = null;
     try { storedTheme = localStorage.getItem('kg_theme'); } catch (e) {}
@@ -1880,7 +2156,7 @@
     });
 
     document.getElementById('grid').addEventListener('click', function (e) {
-      if (e.target.closest('[data-fav]') || e.target.closest('[data-edit]') || e.target.closest('[data-delete]') || e.target.closest('[data-renew]') || e.target.closest('[data-promote]')) return;
+      if (e.target.closest('[data-fav]') || e.target.closest('[data-edit]') || e.target.closest('[data-delete]') || e.target.closest('[data-renew]') || e.target.closest('[data-promote]') || e.target.closest('[data-compare]')) return;
       var row = e.target.closest('.feed-row');
       if (!row) return;
       var id = row.getAttribute('data-id');
@@ -1888,9 +2164,27 @@
       if (item) openDetail(item);
     });
 
+    document.getElementById('grid').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      if (!e.target.classList.contains('feed-row')) return;
+      e.preventDefault();
+      var id = e.target.getAttribute('data-id');
+      var item = allData().find(function (i) { return i.id === id; });
+      if (item) openDetail(item);
+    });
+
     var detailBackdrop = document.getElementById('detailBackdrop');
     document.getElementById('closeDetailBtn').addEventListener('click', function () { detailBackdrop.hidden = true; });
     detailBackdrop.addEventListener('click', function (e) { if (e.target === detailBackdrop) detailBackdrop.hidden = true; });
+
+    var compareBackdrop = document.getElementById('compareBackdrop');
+    document.getElementById('compareNowBtn').addEventListener('click', openCompareModal);
+    document.getElementById('compareClearBtn').addEventListener('click', function () {
+      compareSelection = [];
+      render();
+    });
+    document.getElementById('closeCompareBtn').addEventListener('click', function () { compareBackdrop.hidden = true; });
+    compareBackdrop.addEventListener('click', function (e) { if (e.target === compareBackdrop) compareBackdrop.hidden = true; });
 
     function copyShareLink(url) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -2134,8 +2428,15 @@
     });
 
     document.addEventListener('keydown', function (e) {
+      var lightbox = document.getElementById('lightboxBackdrop');
+      if (lightbox && !lightbox.hidden) {
+        if (e.key === 'Escape') { closeLightbox(); return; }
+        if (e.key === 'ArrowLeft') { document.getElementById('lightboxPrevBtn').click(); return; }
+        if (e.key === 'ArrowRight') { document.getElementById('lightboxNextBtn').click(); return; }
+        return;
+      }
       if (e.key !== 'Escape') return;
-      var overlays = ['shareBackdrop', 'reportBackdrop', 'accountBackdrop', 'authBackdrop', 'infoBackdrop', 'paymentBackdrop', 'modalBackdrop', 'detailBackdrop'];
+      var overlays = ['shareBackdrop', 'reportBackdrop', 'accountBackdrop', 'authBackdrop', 'infoBackdrop', 'paymentBackdrop', 'modalBackdrop', 'detailBackdrop', 'compareBackdrop'];
       for (var i = 0; i < overlays.length; i++) {
         var el = document.getElementById(overlays[i]);
         if (el && !el.hidden) { el.hidden = true; return; }
