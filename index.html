@@ -1056,6 +1056,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script>
 (function () {
   var PHOTOS = {
@@ -1268,25 +1269,34 @@
     try { localStorage.setItem('kg_favorites', JSON.stringify(state.favs)); } catch (e) {}
   }
 
-  function loadAccounts() {
-    try { return JSON.parse(localStorage.getItem('kg_accounts') || '{}'); } catch (e) { return {}; }
+  var SUPABASE_URL = 'https://rqailwsjdhsmkajkvkpn.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_t2GqMBWaZMp0XPalvdrcpw_JZQaI7-t';
+  var sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+  var currentUsername = null;
+
+  function usernameToEmail(u) {
+    return u.trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '') + '@karajkhaled.local';
   }
-  function saveAccounts(accounts) {
-    try { localStorage.setItem('kg_accounts', JSON.stringify(accounts)); } catch (e) {}
+  function rememberKnownUsername(name) {
+    try {
+      var known = JSON.parse(localStorage.getItem('kg_known_accounts') || '[]');
+      if (known.indexOf(name) === -1) { known.push(name); localStorage.setItem('kg_known_accounts', JSON.stringify(known)); }
+    } catch (e) {}
   }
   function getSession() {
-    try { return localStorage.getItem('kg_session') || null; } catch (e) { return null; }
+    return currentUsername;
   }
   function setSession(username) {
-    try {
-      if (username) localStorage.setItem('kg_session', username);
-      else localStorage.removeItem('kg_session');
-    } catch (e) {}
+    currentUsername = username;
+    if (username) rememberKnownUsername(username);
   }
 
   function isTrustedSeller(name) {
-    var accounts = loadAccounts();
-    return !!accounts[name];
+    if (name === currentUsername) return true;
+    try {
+      var known = JSON.parse(localStorage.getItem('kg_known_accounts') || '[]');
+      return known.indexOf(name) !== -1;
+    } catch (e) { return false; }
   }
 
   function isFeatured(item) {
@@ -2164,6 +2174,24 @@
     renderSiteRating();
     render();
 
+    if (sbClient) {
+      sbClient.auth.getSession().then(function (result) {
+        var session = result.data && result.data.session;
+        if (session && session.user) {
+          var uname = (session.user.user_metadata && session.user.user_metadata.username) || session.user.email.split('@')[0];
+          setSession(uname);
+          updateAuthBtn();
+          render();
+        }
+      });
+      sbClient.auth.onAuthStateChange(function (event) {
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          updateAuthBtn();
+        }
+      });
+    }
+
     document.getElementById('catStrip').addEventListener('click', function (e) {
       var btn = e.target.closest('.cat-tile');
       if (!btn) return;
@@ -2375,6 +2403,7 @@
       render();
     });
     document.getElementById('accountLogoutBtn').addEventListener('click', function () {
+      if (sbClient) sbClient.auth.signOut();
       setSession(null);
       updateAuthBtn();
       accountBackdrop.hidden = true;
@@ -2388,29 +2417,43 @@
       var username = document.getElementById('auth-username').value.trim();
       var password = document.getElementById('auth-password').value;
       var note = document.getElementById('authNote');
+      var submitBtn = document.getElementById('authSubmitBtn');
+      note.textContent = '';
       if (!username || !password) return;
-      var accounts = loadAccounts();
-      if (authMode === 'signup') {
-        if (accounts[username]) {
-          note.textContent = 'اسم المستخدم موجود مسبقًا، جرّب اسم آخر أو سجّل الدخول.';
-          return;
-        }
-        accounts[username] = { password: password };
-        saveAccounts(accounts);
-        setSession(username);
-        authBackdrop.hidden = true;
-        updateAuthBtn();
-        showToast('تم إنشاء حسابك بنجاح، أهلًا ' + username);
-      } else {
-        if (!accounts[username] || accounts[username].password !== password) {
-          note.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة.';
-          return;
-        }
-        setSession(username);
-        authBackdrop.hidden = true;
-        updateAuthBtn();
-        showToast('أهلًا بعودتك، ' + username);
+      if (!sbClient) {
+        note.textContent = 'تعذّر الاتصال بخدمة تسجيل الدخول، حاول لاحقًا.';
+        return;
       }
+      submitBtn.disabled = true;
+      var email = usernameToEmail(username);
+      var authCall = authMode === 'signup'
+        ? sbClient.auth.signUp({ email: email, password: password, options: { data: { username: username } } })
+        : sbClient.auth.signInWithPassword({ email: email, password: password });
+      authCall.then(function (result) {
+        submitBtn.disabled = false;
+        if (result.error) {
+          var msg = result.error.message || '';
+          if (authMode === 'signup' && /registered|exists/i.test(msg)) {
+            note.textContent = 'اسم المستخدم موجود مسبقًا، جرّب اسم آخر أو سجّل الدخول.';
+          } else if (authMode === 'login' && /credentials|invalid/i.test(msg)) {
+            note.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+          } else {
+            note.textContent = msg || 'حدث خطأ غير متوقع، حاول مرة أخرى.';
+          }
+          return;
+        }
+        if (authMode === 'signup' && !result.data.session) {
+          note.textContent = 'تم إنشاء الحساب، لكن يلزم تأكيد إضافي. جرّب تسجيل الدخول.';
+          return;
+        }
+        setSession(username);
+        authBackdrop.hidden = true;
+        updateAuthBtn();
+        showToast(authMode === 'signup' ? 'تم إنشاء حسابك بنجاح، أهلًا ' + username : 'أهلًا بعودتك، ' + username);
+      }).catch(function () {
+        submitBtn.disabled = false;
+        note.textContent = 'تعذّر الاتصال بخدمة تسجيل الدخول، تحقق من الإنترنت وحاول مرة أخرى.';
+      });
     });
 
     document.getElementById('messageForm').addEventListener('submit', function (e) {
