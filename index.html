@@ -1,71 +1,67 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
 <title>كراج خالد</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&display=swap">
 <style>
   :root {
-    --bg: #ffffff;
+    --bg: #eef1f8;
     --surface: #ffffff;
-    --surface-2: #eafbf7;
-    --border: #e6e6e6;
-    --ink: #1a1a1a;
-    --muted: #6b6b6b;
-    --primary: #1fb984;
-    --primary-dark: #027c6b;
-    --primary-light: #eafbf7;
-    --header-bg: #003333;
+    --surface-2: #e8f7ff;
+    --border: #d7deec;
+    --ink: #16202c;
+    --muted: #6b7684;
+    --primary: #1073c0;
+    --primary-dark: #0061ad;
+    --primary-light: #e8f7ff;
     --amber: #b8791f;
     --cta: #feca81;
     --cta-dark: #fdb651;
-    --cta-ink: #003333;
+    --cta-ink: #6b4210;
     --title-accent: #1fb984;
-    --danger: #b0200c;
-    --shadow: rgba(0, 51, 51, 0.08);
+    --danger: #c1432f;
+    --shadow: rgba(16, 60, 110, 0.1);
     --fav-btn-bg: rgba(255, 255, 255, 0.9);
     --radius-s: 8px;
-    --radius-m: 10px;
+    --radius-m: 12px;
     --radius-l: 18px;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #0d1a16;
-      --surface: #122620;
-      --surface-2: #173229;
-      --border: #24413a;
-      --ink: #eaf6f1;
-      --muted: #8fada3;
-      --primary: #2fd39b;
-      --primary-dark: #5be3bb;
-      --primary-light: #173229;
-      --header-bg: #04211d;
+      --bg: #0a1220;
+      --surface: #101c30;
+      --surface-2: #16283f;
+      --border: #223a56;
+      --ink: #eaf1fb;
+      --muted: #93a1b4;
+      --primary: #4c90ff;
+      --primary-dark: #74a9ff;
+      --primary-light: #16294a;
       --amber: #e0a94a;
       --cta: #f5c26e;
       --cta-dark: #e2a94e;
-      --cta-ink: #12251f;
+      --cta-ink: #3a2607;
       --title-accent: #2fd39b;
       --danger: #e2685a;
       --shadow: rgba(0, 0, 0, 0.45);
-      --fav-btn-bg: rgba(13, 26, 22, 0.75);
+      --fav-btn-bg: rgba(10, 18, 32, 0.75);
     }
   }
   :root[data-theme="dark"] {
-    --bg: #0d1a16;
-    --surface: #122620;
-    --surface-2: #173229;
-    --border: #24413a;
-    --ink: #eaf6f1;
-    --muted: #8fada3;
-    --primary: #2fd39b;
-    --primary-dark: #5be3bb;
-    --primary-light: #173229;
-    --header-bg: #04211d;
+    --bg: #0a1220;
+    --surface: #101c30;
+    --surface-2: #16283f;
+    --border: #223a56;
+    --ink: #eaf1fb;
+    --muted: #93a1b4;
+    --primary: #4c90ff;
+    --primary-dark: #74a9ff;
+    --primary-light: #16294a;
     --amber: #e0a94a;
     --cta: #f5c26e;
     --cta-dark: #e2a94e;
-    --cta-ink: #12251f;
+    --cta-ink: #3a2607;
     --title-accent: #2fd39b;
     --danger: #e2685a;
     --shadow: rgba(0, 0, 0, 0.45);
-    --fav-btn-bg: rgba(13, 26, 22, 0.75);
+    --fav-btn-bg: rgba(10, 18, 32, 0.75);
   }
 
   * { box-sizing: border-box; }
@@ -80,7 +76,7 @@
     font-variant-numeric: tabular-nums;
   }
   .site h1, .site h2, .site h3, .site .display {
-    font-family: "El Messiri", Tahoma, sans-serif;
+    font-family: "Cairo", Tahoma, sans-serif;
     text-wrap: balance;
   }
   a { color: inherit; text-decoration: none; }
@@ -92,7 +88,7 @@
   .utilbar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 16px clamp(16px, 4vw, 40px);
-    background: var(--header-bg); color: #fff; font-size: 0.76rem;
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark)); color: #fff; font-size: 0.76rem;
   }
   .utilbar a { opacity: 0.9; }
   .utilbar .u-left { display: flex; gap: 16px; }
@@ -120,7 +116,7 @@
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 4px 10px var(--shadow); flex-shrink: 0;
   }
-  .brand-name { font-family: "El Messiri", Tahoma, sans-serif; font-weight: 800; font-size: 1.25rem; line-height: 1; color: var(--primary-dark); }
+  .brand-name { font-family: "Cairo", Tahoma, sans-serif; font-weight: 800; font-size: 1.25rem; line-height: 1; color: var(--primary-dark); }
   .brand-name small { display: block; font-family: "IBM Plex Sans Arabic", sans-serif; font-weight: 500; font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
 
   .searchbar {
@@ -194,10 +190,10 @@
   .brand-tile .brand-avatar {
     width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-family: "El Messiri", sans-serif; font-weight: 800; font-size: 0.78rem; color: #fff;
+    font-family: "Cairo", sans-serif; font-weight: 800; font-size: 0.78rem; color: #fff;
   }
   .brand-tile .wordmark {
-    font-family: "El Messiri", sans-serif; font-weight: 800; font-size: 0.76rem; color: var(--ink); line-height: 1.2;
+    font-family: "Cairo", sans-serif; font-weight: 800; font-size: 0.76rem; color: var(--ink); line-height: 1.2;
   }
   .brand-tile.active { border-color: var(--primary); background: var(--primary-light); }
   .brand-tile.active .wordmark { color: var(--primary-dark); }
@@ -227,43 +223,9 @@
   }
 
   /* ---------- Page wrap ---------- */
-  .page-shell {
-    max-width: 1180px; margin: 0 auto;
-    padding: 0 clamp(16px, 4vw, 40px);
-  }
   .page-wrap {
-    padding: 24px 0 60px;
-  }
-  .quick-access { display: none; }
-  @media (min-width: 980px) {
-    .mobile-brand-browse { display: none; }
-    .page-shell { display: flex; align-items: flex-start; gap: 28px; }
-    .page-wrap { flex: 1; min-width: 0; }
-    .quick-access {
-      display: block; order: -1; flex-shrink: 0; width: 280px;
-      margin-top: 24px; padding: 18px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: var(--radius-m); box-shadow: 0 1px 3px var(--shadow);
-      position: sticky; top: 84px;
-    }
-  }
-  .quick-access h3 {
-    margin: 0 0 14px; font-size: 0.92rem; font-weight: 700; color: var(--primary-dark);
-  }
-  .qa-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .qa-tile {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    border: 1px solid var(--border); border-radius: var(--radius-s); background: var(--bg);
-    padding: 10px 4px; text-align: center;
-  }
-  .qa-tile .brand-avatar {
-    width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-family: "El Messiri", sans-serif; font-weight: 800; font-size: 0.74rem; color: #fff; flex-shrink: 0;
-  }
-  .qa-tile .wordmark { font-size: 0.68rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
-  .qa-tile.active { border-color: var(--primary); background: var(--primary-light); }
-  .qa-more-btn {
-    grid-column: 1 / -1; padding: 8px; border-radius: var(--radius-s); border: 1px dashed var(--border);
-    background: var(--surface-2); color: var(--primary-dark); font-weight: 700; font-size: 0.76rem;
+    max-width: 1180px; margin: 0 auto;
+    padding: 24px clamp(16px, 4vw, 40px) 60px;
   }
 
   .price-inputs { display: flex; align-items: center; gap: 8px; }
@@ -284,11 +246,6 @@
   .price-filter-label { font-size: 0.82rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
   .price-filter-row .price-inputs { flex: 0 1 260px; }
   .price-filter-row .clear-btn { margin-inline-start: auto; flex-shrink: 0; }
-  .only-price-toggle {
-    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-    font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer;
-  }
-  .only-price-toggle input { accent-color: var(--primary); width: 15px; height: 15px; }
   .active-filter-chip {
     flex-shrink: 0; display: flex; align-items: center; gap: 6px;
     padding: 7px 10px 7px 16px; border-radius: 999px; border: 1px solid var(--primary);
@@ -312,13 +269,14 @@
   .feed { display: flex; flex-direction: column; }
   .feed-row {
     display: flex; align-items: center; gap: 14px;
-    padding: 14px 10px; margin: 0 -10px;
-    border-radius: var(--radius-s);
+    padding: 14px 12px; margin-bottom: 8px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-m);
+    box-shadow: 0 1px 3px var(--shadow);
     cursor: pointer;
-    transition: background-color .15s;
+    transition: border-color .15s, box-shadow .15s;
   }
-  .feed-row:nth-child(even) { background: var(--surface-2); }
-  .feed-row:hover { background: var(--primary-light); }
+  .feed-row:nth-child(even) { background: var(--bg); }
+  .feed-row:hover { border-color: var(--primary); box-shadow: 0 3px 10px var(--shadow); }
   .feed-row:focus-visible, .similar-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   .feed-thumb {
     position: relative; flex-shrink: 0; width: 92px; height: 92px; border-radius: var(--radius-m);
@@ -340,7 +298,7 @@
   .feed-side {
     flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; text-align: end;
   }
-  .feed-price { font-family: "El Messiri", sans-serif; font-weight: 800; font-size: 1.02rem; color: var(--ink); white-space: nowrap; }
+  .feed-price { font-family: "Cairo", sans-serif; font-weight: 800; font-size: 1.02rem; color: var(--primary-dark); white-space: nowrap; }
   .fav-btn {
     width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg);
     display: flex; align-items: center; justify-content: center;
@@ -362,7 +320,7 @@
   .feed-meta span svg { width: 11px; height: 11px; vertical-align: -1px; }
   .feed-row.is-sold, .feed-row.is-expired { opacity: 0.55; }
   .feed-row.is-sold:hover, .feed-row.is-expired:hover { opacity: 0.75; }
-  .feed-row.is-featured { background: var(--primary-light); box-shadow: inset 3px 0 0 var(--primary); }
+  .feed-row.is-featured { background: var(--primary-light); border-color: var(--primary); }
 
   .view-banner {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -400,7 +358,7 @@
   }
   .rating-summary { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; color: var(--ink); }
   .rating-summary svg { width: 18px; height: 18px; color: var(--amber); flex-shrink: 0; }
-  .rating-summary b { font-family: "El Messiri", sans-serif; font-size: 1rem; }
+  .rating-summary b { font-family: "Cairo", sans-serif; font-size: 1rem; }
   .rating-stars { display: flex; gap: 4px; }
   .rating-stars button { background: none; border: none; padding: 2px; color: var(--border); }
   .rating-stars button svg { width: 26px; height: 26px; }
@@ -444,7 +402,7 @@
   }
   .promo-plan-title { display: flex; align-items: center; gap: 6px; font-weight: 700; color: var(--primary-dark); font-size: 0.88rem; }
   .promo-plan-title svg { color: var(--amber); flex-shrink: 0; }
-  .promo-plan-price { font-family: "El Messiri", sans-serif; font-weight: 800; color: var(--primary-dark); }
+  .promo-plan-price { font-family: "Cairo", sans-serif; font-weight: 800; color: var(--primary-dark); }
   .demo-notice { font-size: 0.76rem; color: var(--amber); background: #fef3d6; border-radius: var(--radius-s); padding: 8px 10px; margin: 0; }
   .cat-notice {
     display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--amber);
@@ -556,7 +514,7 @@
     .detail-body { width: 58%; }
   }
   #detailTitle { margin: 2px 0 0; font-size: 1.25rem; color: var(--title-accent); }
-  .detail-price { font-family: "El Messiri", sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--primary-dark); }
+  .detail-price { font-family: "Cairo", sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--primary-dark); }
   .detail-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted); }
   .detail-meta span { display: flex; align-items: center; gap: 4px; }
   .detail-meta svg { width: 13px; height: 13px; }
@@ -581,7 +539,7 @@
   .seller-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
   .seller-avatar {
     width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary-dark);
-    display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: "El Messiri", sans-serif; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: "Cairo", sans-serif; flex-shrink: 0;
   }
   .seller-name { font-weight: 700; font-size: 0.9rem; }
   .seller-sub { font-size: 0.74rem; color: var(--muted); }
@@ -690,14 +648,12 @@
     </button>
   </nav>
 
-  <div class="mobile-brand-browse">
   <div class="section-label" style="padding:14px clamp(16px,4vw,40px) 0;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>
     تصفح حسب الماركة
   </div>
   <p class="brand-disclaimer" style="padding:0 clamp(16px,4vw,40px);">الأسماء هنا لأغراض التصنيف والبحث فقط، ولا تعني أي شراكة أو ارتباط رسمي بالشركات المصنّعة.</p>
   <div class="brand-strip" id="brandStrip"></div>
-  </div>
 
   <div class="filters-row">
     <div class="filter-field">
@@ -741,14 +697,9 @@
       <span>—</span>
       <input type="number" id="maxPrice" placeholder="إلى" min="0">
     </div>
-    <label class="only-price-toggle">
-      <input type="checkbox" id="onlyWithPriceCheck">
-      عرض الإعلانات التي تحتوي على أسعار فقط
-    </label>
     <button class="clear-btn" id="clearFilters" type="button">مسح كل الفلاتر</button>
   </div>
 
-  <div class="page-shell">
   <div class="page-wrap">
     <div class="section-label">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16l-6 8v6l-4 2v-8L4 5z"></path></svg>
@@ -769,11 +720,6 @@
     </div>
     <div class="feed" id="grid"></div>
     <div class="load-more-wrap" id="loadMoreWrap"></div>
-  </div>
-  <aside class="quick-access" id="quickAccessSidebar">
-    <h3>الوصول السريع</h3>
-    <div class="qa-grid" id="quickAccessGrid"></div>
-  </aside>
   </div>
 
   <footer>
@@ -836,8 +782,8 @@
           <input id="f-brand" type="text" placeholder="مثال: تويوتا">
         </div>
         <div class="field">
-          <label for="f-price">السعر (ريال) — اتركه فارغًا لعرض "تواصل للسعر"</label>
-          <input id="f-price" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="مثال: 65000">
+          <label for="f-price">السعر (ريال)</label>
+          <input id="f-price" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="مثال: 65000" required>
         </div>
         <div class="field">
           <label for="f-city">المدينة</label>
@@ -1277,7 +1223,7 @@
   var CITIES = ['الرياض', 'جدة', 'مكة', 'الدمام', 'الخبر', 'الطائف', 'بريدة', 'حائل', 'المدينة'];
   var CONTACT_PHONE_INTL = '966547203707';
   var CONTACT_PHONE_TEL = '+966547203707';
-  var BRANDS = ['تويوتا', 'نيسان', 'فورد', 'لكزس', 'بي ام دبليو', 'جي ام سي', 'شيفروليه', 'هيونداي', 'كيا', 'مرسيدس', 'هوندا', 'مازدا', 'جيب', 'رنج روفر', 'أودي', 'ميتسوبيشي', 'دودج', 'فولكس واجن', 'بيجو', 'سكودا', 'فيات', 'أوبل', 'سوزوكي', 'بورش', 'رينو', 'سوبارو', 'فولفو', 'شيري', 'جيلي', 'ساب', 'دايو', 'إنفينيتي', 'جاكوار', 'كرايسلر', 'سيتروين', 'ميني', 'تسلا', 'Apple', 'Samsung', 'Xiaomi', 'Huawei'];
+  var BRANDS = ['تويوتا', 'نيسان', 'فورد', 'لكزس', 'بي ام دبليو', 'جي ام سي', 'شيفروليه', 'هيونداي', 'كيا', 'مرسيدس', 'هوندا', 'مازدا', 'جيب', 'رنج روفر', 'أودي', 'ميتسوبيشي', 'دودج', 'Apple', 'Samsung', 'Xiaomi', 'Huawei'];
   var CAT_LABELS = { car: 'سيارة', phone: 'جوال', carparts: 'قطعة غيار', accessories: 'إكسسوار', realestate: 'عقار', plates: 'لوحة مميزة' };
   var STATUS_LABELS = { urgent: 'عاجل', reserved: 'محجوز', sold: 'مباع' };
   var PAGE_SIZE = 8;
@@ -1291,7 +1237,7 @@
     return PLATE_SVG;
   }
 
-  var state = { cat: 'all', query: '', city: null, brand: null, year: null, min: null, max: null, onlyWithPrice: false, rooms: null, plateType: null, sort: 'newest', favs: {}, view: 'browse', visibleCount: PAGE_SIZE };
+  var state = { cat: 'all', query: '', city: null, brand: null, year: null, min: null, max: null, rooms: null, plateType: null, sort: 'newest', favs: {}, view: 'browse', visibleCount: PAGE_SIZE };
   var compareSelection = [];
   var userListings = [];
 
@@ -1430,13 +1376,12 @@
   function allData() { return userListings.concat(SAMPLE_DATA); }
 
   function fmtPrice(n) {
-    if (!n) return 'تواصل للسعر';
     return n.toLocaleString('en-US') + ' ريال';
   }
 
   var BRAND_PREVIEW_COUNT = 13;
   var brandExpanded = false;
-  var AVATAR_PALETTE = ['#1fb984', '#027c6b', '#2e8c6f', '#4a9c82', '#1e6c30'];
+  var AVATAR_PALETTE = ['#1360d1', '#0c4595', '#3f7fc9', '#5c85a8', '#2f5d8f'];
 
   function avatarColor(str) {
     var hash = 0;
@@ -1444,21 +1389,21 @@
     return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
   }
 
-  function buildBrandWidget(containerId, tileClass, moreClass) {
-    var container = document.getElementById(containerId);
-    if (!container) return;
+  function buildBrandStrip() {
+    var container = document.getElementById('brandStrip');
     container.innerHTML = '';
     var list = brandExpanded ? BRANDS : BRANDS.slice(0, BRAND_PREVIEW_COUNT);
     list.forEach(function (v) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = tileClass + (state.brand === v ? ' active' : '');
+      b.className = 'brand-tile' + (state.brand === v ? ' active' : '');
       var initial = v.trim().charAt(0);
       b.innerHTML = '<span class="brand-avatar" style="background:' + avatarColor(v) + '">' + initial + '</span><span class="wordmark">' + v + '</span>';
       b.addEventListener('click', function () {
         state.brand = state.brand === v ? null : v;
+        Array.prototype.forEach.call(container.children, function (c) { c.classList.remove('active'); });
+        if (state.brand === v) b.classList.add('active');
         state.visibleCount = PAGE_SIZE;
-        buildBrandStrip();
         render();
       });
       container.appendChild(b);
@@ -1467,7 +1412,7 @@
     if (BRANDS.length > BRAND_PREVIEW_COUNT) {
       var toggleBtn = document.createElement('button');
       toggleBtn.type = 'button';
-      toggleBtn.className = moreClass;
+      toggleBtn.className = 'brand-more-tile';
       toggleBtn.innerHTML = brandExpanded
         ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"></path></svg><span>عرض أقل</span>'
         : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg><span>+' + (BRANDS.length - BRAND_PREVIEW_COUNT) + ' أخرى</span>';
@@ -1477,11 +1422,6 @@
       });
       container.appendChild(toggleBtn);
     }
-  }
-
-  function buildBrandStrip() {
-    buildBrandWidget('brandStrip', 'brand-tile', 'brand-more-tile');
-    buildBrandWidget('quickAccessGrid', 'qa-tile', 'qa-more-btn');
   }
 
   function populateCitySelect() {
@@ -1543,7 +1483,6 @@
     if (state.city && item.city !== state.city) return false;
     if (state.brand && item.brand !== state.brand) return false;
     if (state.year && item.year !== state.year) return false;
-    if (state.onlyWithPrice && !item.price) return false;
     if (state.min != null && item.price < state.min) return false;
     if (state.max != null && item.price > state.max) return false;
     if (state.rooms != null && item.rooms !== state.rooms) return false;
@@ -1616,11 +1555,10 @@
   }
 
   function clearAllFilters() {
-    state.cat = 'all'; state.query = ''; state.city = null; state.brand = null; state.year = null; state.min = null; state.max = null; state.onlyWithPrice = false; state.rooms = null; state.plateType = null; state.sort = 'newest'; state.visibleCount = PAGE_SIZE;
+    state.cat = 'all'; state.query = ''; state.city = null; state.brand = null; state.year = null; state.min = null; state.max = null; state.rooms = null; state.plateType = null; state.sort = 'newest'; state.visibleCount = PAGE_SIZE;
     document.getElementById('searchInput').value = '';
     document.getElementById('minPrice').value = '';
     document.getElementById('maxPrice').value = '';
-    document.getElementById('onlyWithPriceCheck').checked = false;
     document.getElementById('sortSelect').value = 'newest';
     document.getElementById('yearSelect').value = '';
     document.getElementById('citySelect').value = '';
@@ -1628,7 +1566,7 @@
     document.getElementById('plateTypeSelect').value = '';
     Array.prototype.forEach.call(document.querySelectorAll('.cat-tile'), function (p) { p.classList.remove('active'); });
     document.querySelector('.cat-tile[data-cat="all"]').classList.add('active');
-    Array.prototype.forEach.call(document.querySelectorAll('.brand-tile, .qa-tile'), function (c) { c.classList.remove('active'); });
+    Array.prototype.forEach.call(document.querySelectorAll('.brand-tile'), function (c) { c.classList.remove('active'); });
     updateCategoryFilterVisibility();
     render();
   }
@@ -2124,7 +2062,7 @@
 
   function populateYearSelect() {
     var sel = document.getElementById('yearSelect');
-    for (var y = 2026; y >= 1990; y--) {
+    for (var y = 2026; y >= 2010; y--) {
       var opt = document.createElement('option');
       opt.value = String(y);
       opt.textContent = String(y);
@@ -2254,11 +2192,6 @@
     });
     document.getElementById('maxPrice').addEventListener('input', function (e) {
       state.max = e.target.value === '' ? null : Number(e.target.value);
-      state.visibleCount = PAGE_SIZE;
-      render();
-    });
-    document.getElementById('onlyWithPriceCheck').addEventListener('change', function (e) {
-      state.onlyWithPrice = e.target.checked;
       state.visibleCount = PAGE_SIZE;
       render();
     });
