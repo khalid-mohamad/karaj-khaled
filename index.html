@@ -1288,8 +1288,9 @@
   function getSession() {
     return currentUsername;
   }
-  function setSession(username) {
+  function setSession(username, userId) {
     currentUsername = username;
+    currentUserId = username ? (userId || currentUserId) : null;
     if (username) rememberKnownUsername(username);
   }
 
@@ -1299,6 +1300,66 @@
       var known = JSON.parse(localStorage.getItem('kg_known_accounts') || '[]');
       return known.indexOf(name) !== -1;
     } catch (e) { return false; }
+  }
+
+  var remoteListings = [];
+  var remoteViewCounts = {};
+  var remoteRenewCooldowns = {};
+  var currentUserId = null;
+
+  function remoteRowToItem(row) {
+    return {
+      id: row.id, remote: true, ownerId: row.owner_id, cat: row.cat, title: row.title,
+      brand: row.brand, price: row.price, city: row.city, desc: row.description,
+      seller: row.seller, photos: row.photos || [], specs: row.specs || [],
+      rooms: row.rooms, plateType: row.plate_type, status: row.status,
+      featuredUntil: row.featured_until, createdAt: row.created_at, time: 'الآن'
+    };
+  }
+  function itemToRemoteRow(item, ownerId) {
+    return {
+      id: item.id, owner_id: ownerId, cat: item.cat, title: item.title, brand: item.brand,
+      price: item.price, city: item.city, description: item.desc, seller: item.seller,
+      photos: item.photos || [], specs: item.specs || [], rooms: item.rooms || null,
+      plate_type: item.plateType || null, status: item.status || null,
+      featured_until: item.featuredUntil || null, created_at: item.createdAt
+    };
+  }
+
+  function fetchRemoteListings() {
+    if (!sbClient || IS_ARTIFACT_HOST) return Promise.resolve();
+    return sbClient.from('listings').select('*').then(function (result) {
+      if (result.data) remoteListings = result.data.map(remoteRowToItem);
+    }).catch(function () {});
+  }
+  function fetchRemoteViews() {
+    if (!sbClient || IS_ARTIFACT_HOST) return Promise.resolve();
+    return sbClient.from('listing_views').select('*').then(function (result) {
+      if (result.data) {
+        remoteViewCounts = {};
+        result.data.forEach(function (row) { remoteViewCounts[row.listing_id] = row.view_count; });
+      }
+    }).catch(function () {});
+  }
+  function fetchRemoteFavorites() {
+    if (!sbClient || IS_ARTIFACT_HOST || !currentUserId) return Promise.resolve();
+    return sbClient.from('favorites').select('listing_id').eq('user_id', currentUserId).then(function (result) {
+      if (result.data) {
+        result.data.forEach(function (row) { state.favs[row.listing_id] = true; });
+      }
+    }).catch(function () {});
+  }
+  function fetchRemoteRenewCooldowns() {
+    if (!sbClient || IS_ARTIFACT_HOST) return Promise.resolve();
+    return sbClient.from('renew_cooldowns').select('*').then(function (result) {
+      if (result.data) {
+        remoteRenewCooldowns = {};
+        result.data.forEach(function (row) { remoteRenewCooldowns[row.listing_id] = row.last_renewed_at; });
+      }
+    }).catch(function () {});
+  }
+  function syncRemoteData() {
+    return Promise.all([fetchRemoteListings(), fetchRemoteViews(), fetchRemoteRenewCooldowns(), fetchRemoteFavorites()]);
   }
 
   function isFeatured(item) {
@@ -1339,10 +1400,16 @@
     return 15 + (hash % 180);
   }
   function getViewCount(item) {
+    if (item.remote) return seedViewCount(item.id) + (remoteViewCounts[item.id] || 0);
     var views = loadViews();
     return seedViewCount(item.id) + (views[item.id] || 0);
   }
   function incrementView(item) {
+    if (item.remote && sbClient && !IS_ARTIFACT_HOST) {
+      remoteViewCounts[item.id] = (remoteViewCounts[item.id] || 0) + 1;
+      sbClient.rpc('increment_view', { p_listing_id: item.id }).then(function () {}).catch(function () {});
+      return;
+    }
     var views = loadViews();
     views[item.id] = (views[item.id] || 0) + 1;
     saveViews(views);
@@ -1355,12 +1422,12 @@
     try { localStorage.setItem('kg_renew_cooldowns', JSON.stringify(map)); } catch (e) {}
   }
   function getRenewCooldownHours(seller) {
-    var sellerCount = userListings.filter(function (i) { return i.seller === seller; }).length;
+    var sellerCount = userListings.concat(remoteListings).filter(function (i) { return i.seller === seller; }).length;
     var siteBase = Math.floor(allData().length / 10);
     return Math.min(24, Math.max(1, siteBase + sellerCount));
   }
   function getRenewRemainingMs(item) {
-    var last = loadRenewCooldowns()[item.id];
+    var last = item.remote ? remoteRenewCooldowns[item.id] : loadRenewCooldowns()[item.id];
     if (!last) return 0;
     var remaining = (getRenewCooldownHours(item.seller) * 3600000) - (Date.now() - last);
     return remaining > 0 ? remaining : 0;
@@ -1391,7 +1458,10 @@
     updateThemeBtn(theme);
   }
 
-  function allData() { return userListings.concat(SAMPLE_DATA); }
+  function allData() { return userListings.concat(remoteListings).concat(SAMPLE_DATA); }
+  function findAnyItem(id) {
+    return userListings.find(function (i) { return i.id === id; }) || remoteListings.find(function (i) { return i.id === id; });
+  }
 
   function fmtPrice(n) {
     return n.toLocaleString('en-US') + ' ريال';
@@ -1526,7 +1596,10 @@
 
   function scopedData() {
     if (state.view === 'favorites') return allData().filter(function (i) { return !!state.favs[i.id]; });
-    if (state.view === 'mine') return userListings.slice();
+    if (state.view === 'mine') {
+      var me = getSession();
+      return userListings.concat(remoteListings.filter(function (i) { return i.seller === me; }));
+    }
     return allData();
   }
 
@@ -1635,7 +1708,15 @@
         e.stopPropagation();
         var id = btn.getAttribute('data-fav');
         state.favs[id] = !state.favs[id];
-        saveFavs();
+        if (getSession() && sbClient && !IS_ARTIFACT_HOST && currentUserId) {
+          if (state.favs[id]) {
+            sbClient.from('favorites').insert({ user_id: currentUserId, listing_id: id }).then(function () {}).catch(function () {});
+          } else {
+            sbClient.from('favorites').delete().eq('user_id', currentUserId).eq('listing_id', id).then(function () {}).catch(function () {});
+          }
+        } else {
+          saveFavs();
+        }
         if (state.view === 'favorites') { render(); return; }
         btn.classList.toggle('active', !!state.favs[id]);
       });
@@ -1661,21 +1742,29 @@
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         var id = btn.getAttribute('data-renew');
-        var item = userListings.find(function (i) { return i.id === id; });
+        var item = findAnyItem(id);
         if (!item) return;
         var remaining = getRenewRemainingMs(item);
         if (remaining > 0) {
           showToast('لازم تنتظر ' + formatRemaining(remaining) + ' قبل ما تقدر تحدّث هذا الإعلان مرة ثانية');
           return;
         }
-        userListings = userListings.filter(function (i) { return i.id !== id; });
         item.time = 'الآن';
         item.createdAt = Date.now();
-        userListings.unshift(item);
-        saveListings();
-        var cooldowns = loadRenewCooldowns();
-        cooldowns[id] = Date.now();
-        saveRenewCooldowns(cooldowns);
+        if (item.remote && sbClient && !IS_ARTIFACT_HOST && currentUserId) {
+          remoteListings = remoteListings.filter(function (i) { return i.id !== id; });
+          remoteListings.unshift(item);
+          remoteRenewCooldowns[id] = Date.now();
+          sbClient.from('listings').update({ created_at: item.createdAt }).eq('id', id).then(function () {}).catch(function () {});
+          sbClient.from('renew_cooldowns').upsert({ listing_id: id, owner_id: currentUserId, last_renewed_at: Date.now() }).then(function () {}).catch(function () {});
+        } else {
+          userListings = userListings.filter(function (i) { return i.id !== id; });
+          userListings.unshift(item);
+          saveListings();
+          var cooldowns = loadRenewCooldowns();
+          cooldowns[id] = Date.now();
+          saveRenewCooldowns(cooldowns);
+        }
         showToast('تم تحديث الإعلان ورفعه لأعلى القائمة');
         render();
       });
@@ -1685,7 +1774,7 @@
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         var id = btn.getAttribute('data-edit');
-        var item = userListings.find(function (i) { return i.id === id; });
+        var item = findAnyItem(id);
         if (item) openEditForm(item);
       });
     });
@@ -1695,8 +1784,14 @@
         e.stopPropagation();
         var id = btn.getAttribute('data-delete');
         if (!window.confirm('هل تريد حذف هذا الإعلان؟')) return;
-        userListings = userListings.filter(function (i) { return i.id !== id; });
-        saveListings();
+        var item = findAnyItem(id);
+        if (item && item.remote && sbClient && !IS_ARTIFACT_HOST && currentUserId) {
+          remoteListings = remoteListings.filter(function (i) { return i.id !== id; });
+          sbClient.from('listings').delete().eq('id', id).then(function () {}).catch(function () {});
+        } else {
+          userListings = userListings.filter(function (i) { return i.id !== id; });
+          saveListings();
+        }
         showToast('تم حذف الإعلان');
         render();
       });
@@ -1969,7 +2064,7 @@
     if (!session) return;
     document.getElementById('accountAvatar').textContent = session.trim().charAt(0).toUpperCase();
     document.getElementById('accountName').textContent = session;
-    var count = userListings.filter(function (i) { return i.seller === session; }).length;
+    var count = userListings.concat(remoteListings).filter(function (i) { return i.seller === session; }).length;
     document.getElementById('accountStats').textContent = count + ' إعلان منشور';
     document.getElementById('accountBackdrop').hidden = false;
   }
@@ -2182,13 +2277,14 @@
     render();
 
     if (sbClient && !IS_ARTIFACT_HOST) {
+      syncRemoteData().then(function () { render(); });
       sbClient.auth.getSession().then(function (result) {
         var session = result.data && result.data.session;
         if (session && session.user) {
           var uname = (session.user.user_metadata && session.user.user_metadata.username) || session.user.email.split('@')[0];
-          setSession(uname);
+          setSession(uname, session.user.id);
           updateAuthBtn();
-          render();
+          fetchRemoteFavorites().then(function () { render(); });
         }
       }).catch(function () {});
       sbClient.auth.onAuthStateChange(function (event) {
@@ -2412,9 +2508,11 @@
     document.getElementById('accountLogoutBtn').addEventListener('click', function () {
       if (sbClient) sbClient.auth.signOut();
       setSession(null);
+      try { state.favs = JSON.parse(localStorage.getItem('kg_favorites') || '{}'); } catch (e) { state.favs = {}; }
       updateAuthBtn();
       accountBackdrop.hidden = true;
       showToast('تم تسجيل الخروج');
+      render();
     });
     Array.prototype.forEach.call(document.querySelectorAll('.auth-tab'), function (tab) {
       tab.addEventListener('click', function () { openAuthModal(tab.getAttribute('data-tab')); });
@@ -2457,10 +2555,12 @@
           note.textContent = 'تم إنشاء الحساب، لكن يلزم تأكيد إضافي. جرّب تسجيل الدخول.';
           return;
         }
-        setSession(username);
+        var uid = result.data.session && result.data.session.user ? result.data.session.user.id : null;
+        setSession(username, uid);
         authBackdrop.hidden = true;
         updateAuthBtn();
         showToast(authMode === 'signup' ? 'تم إنشاء حسابك بنجاح، أهلًا ' + username : 'أهلًا بعودتك، ' + username);
+        fetchRemoteFavorites().then(function () { render(); });
       }).catch(function () {
         submitBtn.disabled = false;
         note.textContent = 'تعذّر الاتصال بخدمة تسجيل الدخول، تحقق من الإنترنت وحاول مرة أخرى.';
@@ -2489,30 +2589,55 @@
         desc: document.getElementById('f-desc').value.trim(),
         photos: pendingPhotos.slice()
       };
-      if (editId) {
-        var existing = userListings.find(function (i) { return i.id === editId; });
-        if (existing) {
-          existing.cat = data.cat;
-          existing.title = data.title;
-          existing.brand = data.brand;
-          existing.price = data.price;
-          existing.city = data.city;
-          existing.desc = data.desc;
-          existing.photos = data.photos;
-        }
-        showToast('تم حفظ التعديلات');
-      } else {
-        data.id = 'u' + Date.now();
-        data.time = 'الآن';
-        data.createdAt = Date.now();
-        data.seller = getSession() || 'إعلانك';
-        userListings.unshift(data);
-        showToast('تم نشر إعلانك بنجاح');
+      var loggedIn = !!(getSession() && sbClient && !IS_ARTIFACT_HOST && currentUserId);
+
+      function finishSubmit(toastMsg) {
+        backdrop.hidden = true;
+        resetAddForm();
+        render();
+        showToast(toastMsg);
       }
+
+      if (editId) {
+        var existingRemote = remoteListings.find(function (i) { return i.id === editId; });
+        if (existingRemote && loggedIn) {
+          existingRemote.cat = data.cat; existingRemote.title = data.title; existingRemote.brand = data.brand;
+          existingRemote.price = data.price; existingRemote.city = data.city; existingRemote.desc = data.desc; existingRemote.photos = data.photos;
+          sbClient.from('listings').update(itemToRemoteRow(existingRemote, currentUserId)).eq('id', editId).then(function () {}).catch(function () {});
+          finishSubmit('تم حفظ التعديلات');
+          return;
+        }
+        var existingLocal = userListings.find(function (i) { return i.id === editId; });
+        if (existingLocal) {
+          existingLocal.cat = data.cat; existingLocal.title = data.title; existingLocal.brand = data.brand;
+          existingLocal.price = data.price; existingLocal.city = data.city; existingLocal.desc = data.desc; existingLocal.photos = data.photos;
+          saveListings();
+        }
+        finishSubmit('تم حفظ التعديلات');
+        return;
+      }
+
+      data.id = 'u' + Date.now();
+      data.time = 'الآن';
+      data.createdAt = Date.now();
+      data.seller = getSession() || 'إعلانك';
+
+      if (loggedIn) {
+        sbClient.from('listings').insert(itemToRemoteRow(data, currentUserId)).select().single().then(function (result) {
+          if (result.data) remoteListings.unshift(remoteRowToItem(result.data));
+          else { data.remote = false; userListings.unshift(data); saveListings(); }
+          finishSubmit('تم نشر إعلانك بنجاح');
+        }).catch(function () {
+          userListings.unshift(data);
+          saveListings();
+          finishSubmit('تم نشر إعلانك بنجاح');
+        });
+        return;
+      }
+
+      userListings.unshift(data);
       saveListings();
-      backdrop.hidden = true;
-      resetAddForm();
-      render();
+      finishSubmit('تم نشر إعلانك بنجاح');
     });
 
     var INFO_CONTENT = {
