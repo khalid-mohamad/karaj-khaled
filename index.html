@@ -1272,6 +1272,8 @@
   var SUPABASE_URL = 'https://rqailwsjdhsmkajkvkpn.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_t2GqMBWaZMp0XPalvdrcpw_JZQaI7-t';
   var sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+  var GITHUB_SITE_URL = 'https://khalid-mohamad.github.io/karaj-khaled/';
+  var IS_ARTIFACT_HOST = /claudeusercontent\.com$/.test(location.hostname);
   var currentUsername = null;
 
   function usernameToEmail(u) {
@@ -1976,7 +1978,12 @@
     authMode = mode;
     document.getElementById('authTitle').textContent = mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب';
     document.getElementById('authSubmitBtn').textContent = mode === 'login' ? 'دخول' : 'إنشاء الحساب';
-    document.getElementById('authNote').textContent = '';
+    var note = document.getElementById('authNote');
+    if (IS_ARTIFACT_HOST) {
+      note.innerHTML = 'تسجيل الدخول غير متاح على هذه الصفحة. افتح الموقع على <a href="' + GITHUB_SITE_URL + '" target="_blank" rel="noopener" style="color:var(--primary-dark);font-weight:700;text-decoration:underline;">الرابط الرسمي</a> لتسجيل الدخول.';
+    } else {
+      note.textContent = '';
+    }
     Array.prototype.forEach.call(document.querySelectorAll('.auth-tab'), function (t) {
       t.classList.toggle('active', t.getAttribute('data-tab') === mode);
     });
@@ -2174,7 +2181,7 @@
     renderSiteRating();
     render();
 
-    if (sbClient) {
+    if (sbClient && !IS_ARTIFACT_HOST) {
       sbClient.auth.getSession().then(function (result) {
         var session = result.data && result.data.session;
         if (session && session.user) {
@@ -2183,7 +2190,7 @@
           updateAuthBtn();
           render();
         }
-      });
+      }).catch(function () {});
       sbClient.auth.onAuthStateChange(function (event) {
         if (event === 'SIGNED_OUT') {
           setSession(null);
@@ -2420,6 +2427,10 @@
       var submitBtn = document.getElementById('authSubmitBtn');
       note.textContent = '';
       if (!username || !password) return;
+      if (IS_ARTIFACT_HOST) {
+        note.innerHTML = 'تسجيل الدخول غير متاح على هذه الصفحة. افتح الموقع على <a href="' + GITHUB_SITE_URL + '" target="_blank" rel="noopener" style="color:var(--primary-dark);font-weight:700;text-decoration:underline;">الرابط الرسمي</a> لتسجيل الدخول.';
+        return;
+      }
       if (!sbClient) {
         note.textContent = 'تعذّر الاتصال بخدمة تسجيل الدخول، حاول لاحقًا.';
         return;
