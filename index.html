@@ -908,7 +908,47 @@
       </div>
       <button type="button" class="btn btn-ghost" id="accountMineBtn" style="justify-content:center;width:100%;">إعلاناتي</button>
       <button type="button" class="btn btn-ghost" id="accountFavBtn" style="justify-content:center;width:100%;">المفضلة</button>
+      <button type="button" class="btn btn-ghost" id="accountMessagesBtn" style="justify-content:center;width:100%;">الرسائل<span id="unreadBadge" class="status-badge status-urgent" style="display:none;margin-inline-start:6px;"></span></button>
+      <button type="button" class="btn btn-ghost" id="accountPasswordBtn" style="justify-content:center;width:100%;">تغيير كلمة المرور</button>
+      <button type="button" class="btn btn-ghost" id="accountAdminBtn" hidden style="justify-content:center;width:100%;">لوحة الإدارة</button>
       <button type="button" class="btn btn-primary" id="accountLogoutBtn" style="justify-content:center;width:100%;background:var(--danger);">تسجيل خروج</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="messagesBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="messagesTitle" tabindex="-1">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="messagesTitle">الرسائل</h3>
+        <button class="modal-close" id="closeMessagesBtn" type="button" aria-label="إغلاق">×</button>
+      </div>
+      <div id="messagesList"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="passwordBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="passwordTitle" tabindex="-1">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="passwordTitle">تغيير كلمة المرور</h3>
+        <button class="modal-close" id="closePasswordBtn" type="button" aria-label="إغلاق">×</button>
+      </div>
+      <form id="passwordForm">
+        <div class="field">
+          <label for="new-password">كلمة المرور الجديدة</label>
+          <input id="new-password" type="password" placeholder="••••••••" minlength="6" required>
+        </div>
+        <p class="auth-note" id="passwordNote"></p>
+        <button class="btn btn-primary" type="submit">حفظ</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="adminBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="adminTitle" tabindex="-1">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="adminTitle">لوحة الإدارة — البلاغات</h3>
+        <button class="modal-close" id="closeAdminBtn" type="button" aria-label="إغلاق">×</button>
+      </div>
+      <div id="adminReportsList"></div>
     </div>
   </div>
 
@@ -1016,7 +1056,10 @@
           </div>
           <form id="messageForm" class="message-form">
             <textarea id="messageInput" rows="3" placeholder="اكتب رسالتك للبائع، مثال: هل السعر قابل للتفاوض؟" required></textarea>
-            <button class="btn btn-primary" type="submit">إرسال عبر واتساب</button>
+            <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+              <button class="btn btn-ghost" type="button" id="sendInSiteBtn" hidden>إرسال داخل الموقع</button>
+              <button class="btn btn-primary" type="submit">إرسال عبر واتساب</button>
+            </div>
           </form>
         </div>
       </div>
@@ -1326,6 +1369,23 @@
     };
   }
 
+  function uploadPendingPhotos(photos) {
+    if (!sbClient || !currentUserId || IS_ARTIFACT_HOST) return Promise.resolve(photos.slice());
+    var uploads = photos.map(function (src, i) {
+      if (!src || src.indexOf('data:') !== 0) return Promise.resolve(src);
+      return fetch(src).then(function (r) { return r.blob(); }).then(function (blob) {
+        var ext = ((blob.type || 'image/jpeg').split('/')[1] || 'jpg').split('+')[0];
+        var path = currentUserId + '/' + Date.now() + '-' + i + '.' + ext;
+        return sbClient.storage.from('listing-photos').upload(path, blob, { contentType: blob.type }).then(function (result) {
+          if (result.error) return src;
+          var pub = sbClient.storage.from('listing-photos').getPublicUrl(path);
+          return (pub.data && pub.data.publicUrl) || src;
+        });
+      }).catch(function () { return src; });
+    });
+    return Promise.all(uploads);
+  }
+
   function fetchRemoteListings() {
     if (!sbClient || IS_ARTIFACT_HOST) return Promise.resolve();
     return sbClient.from('listings').select('*').then(function (result) {
@@ -1358,8 +1418,22 @@
       }
     }).catch(function () {});
   }
+  var isAdmin = false;
+  var unreadMessageCount = 0;
+  function checkIsAdmin() {
+    if (!sbClient || IS_ARTIFACT_HOST || !currentUserId) { isAdmin = false; return Promise.resolve(); }
+    return sbClient.from('app_admins').select('user_id').eq('user_id', currentUserId).then(function (result) {
+      isAdmin = !!(result.data && result.data.length);
+    }).catch(function () { isAdmin = false; });
+  }
+  function fetchUnreadMessageCount() {
+    if (!sbClient || IS_ARTIFACT_HOST || !currentUserId) { unreadMessageCount = 0; return Promise.resolve(); }
+    return sbClient.from('messages').select('id', { count: 'exact', head: true }).eq('recipient_id', currentUserId).eq('is_read', false).then(function (result) {
+      unreadMessageCount = result.count || 0;
+    }).catch(function () {});
+  }
   function syncRemoteData() {
-    return Promise.all([fetchRemoteListings(), fetchRemoteViews(), fetchRemoteRenewCooldowns(), fetchRemoteFavorites()]);
+    return Promise.all([fetchRemoteListings(), fetchRemoteViews(), fetchRemoteRenewCooldowns(), fetchRemoteFavorites(), checkIsAdmin(), fetchUnreadMessageCount()]);
   }
 
   function isFeatured(item) {
@@ -2059,6 +2133,99 @@
     btn.textContent = session ? '👤 ' + session : 'دخول';
   }
 
+  function updateUnreadBadge() {
+    var badge = document.getElementById('unreadBadge');
+    if (!badge) return;
+    if (unreadMessageCount > 0) {
+      badge.textContent = String(unreadMessageCount);
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function renderMessagesList() {
+    var wrap = document.getElementById('messagesList');
+    if (!sbClient || IS_ARTIFACT_HOST || !currentUserId) {
+      wrap.innerHTML = '<p class="compare-empty">تسجيل الدخول غير متاح هنا.</p>';
+      return;
+    }
+    wrap.innerHTML = '<p class="compare-empty">جارٍ التحميل...</p>';
+    sbClient.from('messages').select('*').eq('recipient_id', currentUserId).order('created_at', { ascending: false }).then(function (result) {
+      var rows = result.data || [];
+      if (!rows.length) {
+        wrap.innerHTML = '<p class="compare-empty">لا توجد رسائل بعد.</p>';
+        return;
+      }
+      wrap.innerHTML = rows.map(function (m) {
+        return '<div class="feed-row" style="cursor:default;">' +
+          '<div class="feed-main">' +
+            '<div class="feed-title-text">' + (m.is_read ? '' : '🔵 ') + (m.sender_name || 'مستخدم') + ' — ' + (m.listing_title || '') + '</div>' +
+            '<div class="feed-meta"><span>' + m.body + '</span></div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      var unreadIds = rows.filter(function (m) { return !m.is_read; }).map(function (m) { return m.id; });
+      if (unreadIds.length) {
+        sbClient.from('messages').update({ is_read: true }).in('id', unreadIds).then(function () {
+          unreadMessageCount = 0;
+          updateUnreadBadge();
+        }).catch(function () {});
+      }
+    }).catch(function () {
+      wrap.innerHTML = '<p class="compare-empty">تعذّر تحميل الرسائل.</p>';
+    });
+  }
+
+  function renderAdminReportsList() {
+    var wrap = document.getElementById('adminReportsList');
+    if (!sbClient || IS_ARTIFACT_HOST || !isAdmin) {
+      wrap.innerHTML = '<p class="compare-empty">غير مصرّح.</p>';
+      return;
+    }
+    wrap.innerHTML = '<p class="compare-empty">جارٍ التحميل...</p>';
+    sbClient.from('reports').select('*').eq('status', 'open').order('created_at', { ascending: false }).then(function (result) {
+      var rows = result.data || [];
+      if (!rows.length) {
+        wrap.innerHTML = '<p class="compare-empty">لا توجد بلاغات مفتوحة.</p>';
+        return;
+      }
+      wrap.innerHTML = rows.map(function (r) {
+        return '<div class="feed-row" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px;">' +
+          '<div class="feed-title-text">إعلان: ' + r.listing_id + '</div>' +
+          '<div class="feed-meta"><span>السبب: ' + r.reason + '</span></div>' +
+          (r.details ? '<div class="feed-meta"><span>' + r.details + '</span></div>' : '') +
+          '<div class="secondary-actions">' +
+            '<button type="button" class="btn btn-ghost" data-dismiss-report="' + r.id + '">تجاهل</button>' +
+            '<button type="button" class="btn btn-primary" style="background:var(--danger);" data-delete-listing="' + r.listing_id + '" data-report-id="' + r.id + '">حذف الإعلان</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      Array.prototype.forEach.call(wrap.querySelectorAll('[data-dismiss-report]'), function (btn) {
+        btn.addEventListener('click', function () {
+          sbClient.from('reports').update({ status: 'dismissed' }).eq('id', btn.getAttribute('data-dismiss-report')).then(function () {
+            renderAdminReportsList();
+          }).catch(function () {});
+        });
+      });
+      Array.prototype.forEach.call(wrap.querySelectorAll('[data-delete-listing]'), function (btn) {
+        btn.addEventListener('click', function () {
+          if (!window.confirm('هل تريد حذف هذا الإعلان نهائيًا؟')) return;
+          var listingId = btn.getAttribute('data-delete-listing');
+          var reportId = btn.getAttribute('data-report-id');
+          sbClient.rpc('admin_delete_listing', { p_listing_id: listingId }).then(function () {}).catch(function () {}).then(function () {
+            remoteListings = remoteListings.filter(function (i) { return i.id !== listingId; });
+            sbClient.from('reports').update({ status: 'resolved' }).eq('id', reportId).then(function () {}).catch(function () {});
+            render();
+            renderAdminReportsList();
+          });
+        });
+      });
+    }).catch(function () {
+      wrap.innerHTML = '<p class="compare-empty">تعذّر تحميل البلاغات.</p>';
+    });
+  }
+
   function openAccountModal() {
     var session = getSession();
     if (!session) return;
@@ -2127,6 +2294,8 @@
   function openDetail(item) {
     currentDetailItem = item;
     incrementView(item);
+    var inSiteBtn = document.getElementById('sendInSiteBtn');
+    inSiteBtn.hidden = !(item.remote && item.ownerId && currentUserId && item.seller !== getSession());
     document.getElementById('detailBadge').innerHTML = CAT_LABELS[item.cat] || item.cat;
     document.getElementById('detailTitle').innerHTML = item.title + (isFeatured(item) ? ' <span class="status-badge status-featured">' + STAR_SVG + 'مميز' + (item.seller === getSession() ? ' · متبقي ' + getFeaturedDaysLeft(item) + ' يوم' : '') + '</span>' : '');
     document.getElementById('detailPrice').textContent = fmtPrice(item.price);
@@ -2261,7 +2430,8 @@
     updateAuthBtn();
     [
       'modalBackdrop', 'reportBackdrop', 'authBackdrop', 'shareBackdrop', 'accountBackdrop',
-      'infoBackdrop', 'paymentBackdrop', 'detailBackdrop', 'lightboxBackdrop', 'compareBackdrop'
+      'infoBackdrop', 'paymentBackdrop', 'detailBackdrop', 'lightboxBackdrop', 'compareBackdrop',
+      'messagesBackdrop', 'passwordBackdrop', 'adminBackdrop'
     ].forEach(setupModalA11y);
     var initialTheme = getEffectiveTheme();
     var storedTheme = null;
@@ -2284,7 +2454,11 @@
           var uname = (session.user.user_metadata && session.user.user_metadata.username) || session.user.email.split('@')[0];
           setSession(uname, session.user.id);
           updateAuthBtn();
-          fetchRemoteFavorites().then(function () { render(); });
+          Promise.all([fetchRemoteFavorites(), checkIsAdmin(), fetchUnreadMessageCount()]).then(function () {
+            document.getElementById('accountAdminBtn').hidden = !isAdmin;
+            updateUnreadBadge();
+            render();
+          });
         }
       }).catch(function () {});
       sbClient.auth.onAuthStateChange(function (event) {
@@ -2475,8 +2649,16 @@
     reportBackdrop.addEventListener('click', function (e) { if (e.target === reportBackdrop) reportBackdrop.hidden = true; });
     document.getElementById('reportForm').addEventListener('submit', function (e) {
       e.preventDefault();
+      var reason = document.getElementById('r-reason').value;
+      var details = document.getElementById('r-details').value.trim();
+      var listingId = currentDetailItem ? currentDetailItem.id : '';
       reportBackdrop.hidden = true;
       showToast('شكرًا، تم إرسال بلاغك وسيتم مراجعته');
+      if (sbClient && !IS_ARTIFACT_HOST && listingId) {
+        sbClient.from('reports').insert({
+          listing_id: listingId, reason: reason, details: details, reporter: getSession() || null
+        }).then(function () {}).catch(function () {});
+      }
     });
 
     var authBackdrop = document.getElementById('authBackdrop');
@@ -2505,10 +2687,62 @@
       state.visibleCount = PAGE_SIZE;
       render();
     });
+
+    var messagesBackdrop = document.getElementById('messagesBackdrop');
+    document.getElementById('accountMessagesBtn').addEventListener('click', function () {
+      accountBackdrop.hidden = true;
+      messagesBackdrop.hidden = false;
+      renderMessagesList();
+    });
+    document.getElementById('closeMessagesBtn').addEventListener('click', function () { messagesBackdrop.hidden = true; });
+    messagesBackdrop.addEventListener('click', function (e) { if (e.target === messagesBackdrop) messagesBackdrop.hidden = true; });
+
+    var passwordBackdrop = document.getElementById('passwordBackdrop');
+    document.getElementById('accountPasswordBtn').addEventListener('click', function () {
+      accountBackdrop.hidden = true;
+      document.getElementById('passwordForm').reset();
+      document.getElementById('passwordNote').textContent = '';
+      passwordBackdrop.hidden = false;
+    });
+    document.getElementById('closePasswordBtn').addEventListener('click', function () { passwordBackdrop.hidden = true; });
+    passwordBackdrop.addEventListener('click', function (e) { if (e.target === passwordBackdrop) passwordBackdrop.hidden = true; });
+    document.getElementById('passwordForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var note = document.getElementById('passwordNote');
+      var newPass = document.getElementById('new-password').value;
+      if (!sbClient || IS_ARTIFACT_HOST) {
+        note.textContent = 'غير متاح على هذه الصفحة.';
+        return;
+      }
+      sbClient.auth.updateUser({ password: newPass }).then(function (result) {
+        if (result.error) {
+          note.textContent = result.error.message || 'تعذّر تغيير كلمة المرور.';
+          return;
+        }
+        passwordBackdrop.hidden = true;
+        showToast('تم تغيير كلمة المرور بنجاح');
+      }).catch(function () {
+        note.textContent = 'تعذّر الاتصال، حاول مرة أخرى.';
+      });
+    });
+
+    var adminBackdrop = document.getElementById('adminBackdrop');
+    document.getElementById('accountAdminBtn').addEventListener('click', function () {
+      accountBackdrop.hidden = true;
+      adminBackdrop.hidden = false;
+      renderAdminReportsList();
+    });
+    document.getElementById('closeAdminBtn').addEventListener('click', function () { adminBackdrop.hidden = true; });
+    adminBackdrop.addEventListener('click', function (e) { if (e.target === adminBackdrop) adminBackdrop.hidden = true; });
+
     document.getElementById('accountLogoutBtn').addEventListener('click', function () {
       if (sbClient) sbClient.auth.signOut();
       setSession(null);
       try { state.favs = JSON.parse(localStorage.getItem('kg_favorites') || '{}'); } catch (e) { state.favs = {}; }
+      isAdmin = false;
+      unreadMessageCount = 0;
+      document.getElementById('accountAdminBtn').hidden = true;
+      updateUnreadBadge();
       updateAuthBtn();
       accountBackdrop.hidden = true;
       showToast('تم تسجيل الخروج');
@@ -2560,7 +2794,11 @@
         authBackdrop.hidden = true;
         updateAuthBtn();
         showToast(authMode === 'signup' ? 'تم إنشاء حسابك بنجاح، أهلًا ' + username : 'أهلًا بعودتك، ' + username);
-        fetchRemoteFavorites().then(function () { render(); });
+        Promise.all([fetchRemoteFavorites(), checkIsAdmin(), fetchUnreadMessageCount()]).then(function () {
+          document.getElementById('accountAdminBtn').hidden = !isAdmin;
+          updateUnreadBadge();
+          render();
+        });
       }).catch(function () {
         submitBtn.disabled = false;
         note.textContent = 'تعذّر الاتصال بخدمة تسجيل الدخول، تحقق من الإنترنت وحاول مرة أخرى.';
@@ -2576,6 +2814,20 @@
       e.target.reset();
       detailBackdrop.hidden = true;
     });
+    document.getElementById('sendInSiteBtn').addEventListener('click', function () {
+      var val = document.getElementById('messageInput').value.trim();
+      if (!val) { showToast('اكتب رسالة أولًا'); return; }
+      if (!currentDetailItem || !currentDetailItem.ownerId || !sbClient || IS_ARTIFACT_HOST) return;
+      sbClient.from('messages').insert({
+        listing_id: currentDetailItem.id, listing_title: currentDetailItem.title,
+        sender_id: currentUserId, sender_name: getSession(), recipient_id: currentDetailItem.ownerId, body: val
+      }).then(function (result) {
+        if (result.error) { showToast('تعذّر إرسال الرسالة'); return; }
+        document.getElementById('messageForm').reset();
+        detailBackdrop.hidden = true;
+        showToast('تم إرسال رسالتك للبائع');
+      }).catch(function () { showToast('تعذّر إرسال الرسالة'); });
+    });
 
     document.getElementById('addForm').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -2590,8 +2842,10 @@
         photos: pendingPhotos.slice()
       };
       var loggedIn = !!(getSession() && sbClient && !IS_ARTIFACT_HOST && currentUserId);
+      var submitBtn = document.getElementById('addSubmitBtn');
 
       function finishSubmit(toastMsg) {
+        submitBtn.disabled = false;
         backdrop.hidden = true;
         resetAddForm();
         render();
@@ -2601,10 +2855,14 @@
       if (editId) {
         var existingRemote = remoteListings.find(function (i) { return i.id === editId; });
         if (existingRemote && loggedIn) {
-          existingRemote.cat = data.cat; existingRemote.title = data.title; existingRemote.brand = data.brand;
-          existingRemote.price = data.price; existingRemote.city = data.city; existingRemote.desc = data.desc; existingRemote.photos = data.photos;
-          sbClient.from('listings').update(itemToRemoteRow(existingRemote, currentUserId)).eq('id', editId).then(function () {}).catch(function () {});
-          finishSubmit('تم حفظ التعديلات');
+          submitBtn.disabled = true;
+          uploadPendingPhotos(data.photos).then(function (urls) {
+            existingRemote.cat = data.cat; existingRemote.title = data.title; existingRemote.brand = data.brand;
+            existingRemote.price = data.price; existingRemote.city = data.city; existingRemote.desc = data.desc; existingRemote.photos = urls;
+            return sbClient.from('listings').update(itemToRemoteRow(existingRemote, currentUserId)).eq('id', editId);
+          }).then(function () {}).catch(function () {}).then(function () {
+            finishSubmit('تم حفظ التعديلات');
+          });
           return;
         }
         var existingLocal = userListings.find(function (i) { return i.id === editId; });
@@ -2623,9 +2881,23 @@
       data.seller = getSession() || 'إعلانك';
 
       if (loggedIn) {
-        sbClient.from('listings').insert(itemToRemoteRow(data, currentUserId)).select().single().then(function (result) {
-          if (result.data) remoteListings.unshift(remoteRowToItem(result.data));
-          else { data.remote = false; userListings.unshift(data); saveListings(); }
+        submitBtn.disabled = true;
+        uploadPendingPhotos(data.photos).then(function (urls) {
+          data.photos = urls;
+          return sbClient.from('listings').insert(itemToRemoteRow(data, currentUserId)).select().single();
+        }).then(function (result) {
+          if (result.error) {
+            if (/rate_limit_exceeded/.test(result.error.message || '')) {
+              submitBtn.disabled = false;
+              showToast('وصلت للحد الأقصى لعدد الإعلانات اليوم، حاول مرة ثانية بكرة');
+              return;
+            }
+            userListings.unshift(data);
+            saveListings();
+            finishSubmit('تم نشر إعلانك بنجاح');
+            return;
+          }
+          remoteListings.unshift(remoteRowToItem(result.data));
           finishSubmit('تم نشر إعلانك بنجاح');
         }).catch(function () {
           userListings.unshift(data);
@@ -2728,7 +3000,7 @@
         return;
       }
       if (e.key !== 'Escape') return;
-      var overlays = ['shareBackdrop', 'reportBackdrop', 'accountBackdrop', 'authBackdrop', 'infoBackdrop', 'paymentBackdrop', 'modalBackdrop', 'detailBackdrop', 'compareBackdrop'];
+      var overlays = ['shareBackdrop', 'reportBackdrop', 'accountBackdrop', 'authBackdrop', 'infoBackdrop', 'paymentBackdrop', 'modalBackdrop', 'detailBackdrop', 'compareBackdrop', 'messagesBackdrop', 'passwordBackdrop', 'adminBackdrop'];
       for (var i = 0; i < overlays.length; i++) {
         var el = document.getElementById(overlays[i]);
         if (el && !el.hidden) { el.hidden = true; return; }
