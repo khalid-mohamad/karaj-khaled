@@ -322,6 +322,7 @@
   .status-featured { background: #fef3d6; color: var(--amber); display: inline-flex; align-items: center; gap: 3px; }
   .status-featured svg { width: 10px; height: 10px; }
   .status-expired { background: var(--surface-2); color: var(--muted); }
+  .status-admin { background: var(--primary-light); color: var(--primary-dark); }
   .feed-meta span svg { width: 11px; height: 11px; vertical-align: -1px; }
   .feed-row.is-sold, .feed-row.is-expired { opacity: 0.55; }
   .feed-row.is-sold:hover, .feed-row.is-expired:hover { opacity: 0.75; }
@@ -902,7 +903,10 @@
       <div class="seller-row">
         <div class="seller-avatar" id="accountAvatar" style="width:56px;height:56px;font-size:1.3rem;"></div>
         <div>
-          <div class="seller-name" id="accountName" style="font-size:1.05rem;"></div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="seller-name" id="accountName" style="font-size:1.05rem;"></div>
+            <span id="accountAdminBadge" class="status-badge status-admin" style="display:none;">أدمن</span>
+          </div>
           <div class="seller-sub" id="accountStats"></div>
         </div>
       </div>
@@ -945,9 +949,18 @@
   <div class="modal-backdrop" id="adminBackdrop" hidden role="dialog" aria-modal="true" aria-labelledby="adminTitle" tabindex="-1">
     <div class="modal">
       <div class="modal-head">
-        <h3 id="adminTitle">لوحة الإدارة — البلاغات</h3>
+        <h3 id="adminTitle">لوحة الإدارة</h3>
         <button class="modal-close" id="closeAdminBtn" type="button" aria-label="إغلاق">×</button>
       </div>
+      <form id="addAdminForm" style="display:flex;gap:8px;align-items:flex-end;margin-bottom:16px;">
+        <div class="field" style="flex:1;">
+          <label for="new-admin-username">إضافة أدمن (اسم المستخدم)</label>
+          <input id="new-admin-username" type="text" placeholder="اسم المستخدم" required>
+        </div>
+        <button class="btn btn-primary" type="submit">إضافة</button>
+      </form>
+      <p class="auth-note" id="addAdminNote"></p>
+      <h4 style="margin:0 0 10px;">البلاغات المفتوحة</h4>
       <div id="adminReportsList"></div>
     </div>
   </div>
@@ -2231,6 +2244,7 @@
     if (!session) return;
     document.getElementById('accountAvatar').textContent = session.trim().charAt(0).toUpperCase();
     document.getElementById('accountName').textContent = session;
+    document.getElementById('accountAdminBadge').style.display = isAdmin ? 'inline-block' : 'none';
     var count = userListings.concat(remoteListings).filter(function (i) { return i.seller === session; }).length;
     document.getElementById('accountStats').textContent = count + ' إعلان منشور';
     document.getElementById('accountBackdrop').hidden = false;
@@ -2734,6 +2748,30 @@
     });
     document.getElementById('closeAdminBtn').addEventListener('click', function () { adminBackdrop.hidden = true; });
     adminBackdrop.addEventListener('click', function (e) { if (e.target === adminBackdrop) adminBackdrop.hidden = true; });
+
+    document.getElementById('addAdminForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var note = document.getElementById('addAdminNote');
+      var input = document.getElementById('new-admin-username');
+      var username = input.value.trim();
+      if (!username) return;
+      if (!sbClient || IS_ARTIFACT_HOST) {
+        note.textContent = 'هذه الميزة غير متاحة على هذه الصفحة.';
+        return;
+      }
+      note.textContent = 'جارٍ الإضافة...';
+      sbClient.rpc('admin_add_admin', { p_username: username }).then(function (result) {
+        if (result.error) {
+          var msg = result.error.message || '';
+          if (/user_not_found/.test(msg)) note.textContent = 'لا يوجد مستخدم بهذا الاسم.';
+          else if (/not_authorized/.test(msg)) note.textContent = 'غير مصرّح لك بهذا الإجراء.';
+          else note.textContent = 'حدث خطأ، حاول مرة أخرى.';
+          return;
+        }
+        note.textContent = 'تمت إضافة "' + username + '" كأدمن بنجاح.';
+        input.value = '';
+      }).catch(function () { note.textContent = 'حدث خطأ، حاول مرة أخرى.'; });
+    });
 
     document.getElementById('accountLogoutBtn').addEventListener('click', function () {
       if (sbClient) sbClient.auth.signOut();
