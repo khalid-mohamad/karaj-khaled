@@ -313,6 +313,19 @@
   .fav-btn.active svg { fill: var(--danger); stroke: var(--danger); }
   .fav-btn.cooldown { opacity: 0.4; }
 
+  .admin-menu { position: relative; }
+  .admin-menu-dropdown {
+    position: absolute; inset-inline-end: 0; top: 36px; z-index: 20; min-width: 210px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-m);
+    box-shadow: 0 6px 20px var(--shadow); padding: 6px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .admin-menu-dropdown button {
+    text-align: start; padding: 8px 10px; border-radius: 8px; border: none; background: none;
+    font-family: inherit; font-size: 0.82rem; font-weight: 700; color: var(--ink); cursor: pointer;
+  }
+  .admin-menu-dropdown button:hover { background: var(--surface-2); }
+  .admin-menu-dropdown button.danger { color: var(--danger); }
+
   .status-badge {
     flex-shrink: 0; font-size: 0.66rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap;
   }
@@ -1144,6 +1157,7 @@
   var CHECK_BADGE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 2.1 3.1-.5 1 3 2.9 1.3-.9 3.1 1.5 2.8-2.5 2 .1 3.2-3.1.6-1.7 2.7-3-1.1-3 1.1-1.7-2.7-3.1-.6.1-3.2-2.5-2 1.5-2.8-.9-3.1 2.9-1.3 1-3 3.1.5z"></path><path d="M9 12.5l2 2 4-4.5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
   var STAR_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6-5.9-3.3-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"></path></svg>';
   var COMPARE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v18"></path><path d="M16 3v18"></path><path d="M3 8l5-5 5 5"></path><path d="M21 16l-5 5-5-5"></path></svg>';
+  var DOTS_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>';
   var CARD_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg>';
   var SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8"></path></svg>';
   var MOON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"></path></svg>';
@@ -1710,6 +1724,16 @@
     var featuredDaysHtml = (state.view === 'mine' && featured) ? '<span>' + STAR_SVG + 'متبقي ' + getFeaturedDaysLeft(item) + ' يوم</span>' : '';
     var isComparing = compareSelection.indexOf(item.id) !== -1;
     var compareHtml = '<button type="button" class="compare-chip' + (isComparing ? ' active' : '') + '" data-compare="' + item.id + '" aria-label="' + (isComparing ? 'إزالة من المقارنة' : 'أضف إلى المقارنة') + '">' + COMPARE_SVG + '<span>' + (isComparing ? 'يُقارَن ✓' : 'قارن') + '</span></button>';
+    var adminMenuHtml = isAdmin ? (
+      '<div class="admin-menu">' +
+        '<button type="button" class="fav-btn" data-admin-menu-toggle="' + item.id + '" aria-label="خيارات الإدارة" aria-haspopup="true" aria-expanded="false">' + DOTS_SVG + '</button>' +
+        '<div class="admin-menu-dropdown" data-admin-menu-dropdown="' + item.id + '" hidden>' +
+          '<button type="button" data-admin-view-messages="' + item.id + '">عرض المحادثات المتعلقة</button>' +
+          '<button type="button" data-admin-view-reports="' + item.id + '">عرض البلاغات على هذا الإعلان</button>' +
+          '<button type="button" class="danger" data-admin-delete-listing="' + item.id + '">حذف الإعلان</button>' +
+        '</div>' +
+      '</div>'
+    ) : '';
     return (
       '<article class="feed-row' + (item.status === 'sold' ? ' is-sold' : '') + (expired ? ' is-expired' : '') + (featured ? ' is-featured' : '') + '" data-id="' + item.id + '" tabindex="0" role="button" aria-label="عرض تفاصيل: ' + item.title + '، ' + fmtPrice(item.price) + '">' +
         '<div class="feed-thumb">' + (photo ? '<img src="' + photo + '" alt="" loading="lazy">' : icon) + '<span class="card-badge">' + badge + '</span></div>' +
@@ -1724,6 +1748,7 @@
           '</div>' +
         '</div>' +
         '<div class="feed-side">' +
+          adminMenuHtml +
           mineActions +
           compareHtml +
           '<div class="feed-price">' + fmtPrice(item.price) + '</div>' +
@@ -1884,7 +1909,61 @@
       });
     });
 
+    Array.prototype.forEach.call(grid.querySelectorAll('[data-admin-menu-toggle]'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var dropdown = btn.parentElement.querySelector('[data-admin-menu-dropdown]');
+        var wasHidden = dropdown.hidden;
+        closeAdminMenus();
+        if (wasHidden) {
+          dropdown.hidden = false;
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    Array.prototype.forEach.call(grid.querySelectorAll('[data-admin-delete-listing]'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeAdminMenus();
+        var id = btn.getAttribute('data-admin-delete-listing');
+        if (!window.confirm('هل تريد حذف هذا الإعلان نهائيًا؟')) return;
+        sbClient.rpc('admin_delete_listing', { p_listing_id: id }).then(function () {}).catch(function () {}).then(function () {
+          remoteListings = remoteListings.filter(function (i) { return i.id !== id; });
+          userListings = userListings.filter(function (i) { return i.id !== id; });
+          showToast('تم حذف الإعلان');
+          render();
+        });
+      });
+    });
+
+    Array.prototype.forEach.call(grid.querySelectorAll('[data-admin-view-messages]'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeAdminMenus();
+        var id = btn.getAttribute('data-admin-view-messages');
+        var item = findAnyItem(id);
+        document.getElementById('messagesBackdrop').hidden = false;
+        renderAdminListingMessages(id, item && item.title);
+      });
+    });
+
+    Array.prototype.forEach.call(grid.querySelectorAll('[data-admin-view-reports]'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeAdminMenus();
+        var id = btn.getAttribute('data-admin-view-reports');
+        document.getElementById('adminBackdrop').hidden = false;
+        renderAdminReportsList(id);
+      });
+    });
+
     updateCompareBar();
+  }
+
+  function closeAdminMenus() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-admin-menu-dropdown]'), function (d) { d.hidden = true; });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-admin-menu-toggle]'), function (b) { b.setAttribute('aria-expanded', 'false'); });
   }
 
   function toggleCompareSelection(id) {
@@ -2158,6 +2237,7 @@
   }
 
   function renderMessagesList() {
+    document.getElementById('messagesTitle').textContent = 'الرسائل';
     var wrap = document.getElementById('messagesList');
     if (!sbClient || IS_ARTIFACT_HOST || !currentUserId) {
       wrap.innerHTML = '<p class="compare-empty">تسجيل الدخول غير متاح هنا.</p>';
@@ -2190,17 +2270,52 @@
     });
   }
 
-  function renderAdminReportsList() {
+  function renderAdminListingMessages(listingId, listingTitle) {
+    document.getElementById('messagesTitle').textContent = 'محادثات الإعلان' + (listingTitle ? ': ' + listingTitle : '');
+    var wrap = document.getElementById('messagesList');
+    if (!sbClient || IS_ARTIFACT_HOST || !isAdmin) {
+      wrap.innerHTML = '<p class="compare-empty">غير مصرّح.</p>';
+      return;
+    }
+    wrap.innerHTML = '<p class="compare-empty">جارٍ التحميل...</p>';
+    sbClient.rpc('admin_get_listing_messages', { p_listing_id: listingId }).then(function (result) {
+      if (result.error) {
+        wrap.innerHTML = '<p class="compare-empty">تعذّر تحميل المحادثات.</p>';
+        return;
+      }
+      var rows = result.data || [];
+      if (!rows.length) {
+        wrap.innerHTML = '<p class="compare-empty">لا توجد رسائل على هذا الإعلان.</p>';
+        return;
+      }
+      wrap.innerHTML = rows.map(function (m) {
+        return '<div class="feed-row" style="cursor:default;">' +
+          '<div class="feed-main">' +
+            '<div class="feed-title-text">' + (m.sender_name || 'مستخدم') + '</div>' +
+            '<div class="feed-meta"><span>' + m.body + '</span></div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }).catch(function () {
+      wrap.innerHTML = '<p class="compare-empty">تعذّر تحميل المحادثات.</p>';
+    });
+  }
+
+  function renderAdminReportsList(filterListingId) {
+    document.getElementById('adminTitle').textContent = filterListingId ? 'بلاغات هذا الإعلان' : 'لوحة الإدارة';
     var wrap = document.getElementById('adminReportsList');
     if (!sbClient || IS_ARTIFACT_HOST || !isAdmin) {
       wrap.innerHTML = '<p class="compare-empty">غير مصرّح.</p>';
       return;
     }
     wrap.innerHTML = '<p class="compare-empty">جارٍ التحميل...</p>';
-    sbClient.from('reports').select('*').eq('status', 'open').order('created_at', { ascending: false }).then(function (result) {
+    var query = sbClient.from('reports').select('*');
+    if (filterListingId) query = query.eq('listing_id', filterListingId);
+    else query = query.eq('status', 'open');
+    query.order('created_at', { ascending: false }).then(function (result) {
       var rows = result.data || [];
       if (!rows.length) {
-        wrap.innerHTML = '<p class="compare-empty">لا توجد بلاغات مفتوحة.</p>';
+        wrap.innerHTML = '<p class="compare-empty">' + (filterListingId ? 'لا توجد بلاغات على هذا الإعلان.' : 'لا توجد بلاغات مفتوحة.') + '</p>';
         return;
       }
       wrap.innerHTML = rows.map(function (r) {
@@ -2217,7 +2332,7 @@
       Array.prototype.forEach.call(wrap.querySelectorAll('[data-dismiss-report]'), function (btn) {
         btn.addEventListener('click', function () {
           sbClient.from('reports').update({ status: 'dismissed' }).eq('id', btn.getAttribute('data-dismiss-report')).then(function () {
-            renderAdminReportsList();
+            renderAdminReportsList(filterListingId);
           }).catch(function () {});
         });
       });
@@ -2230,7 +2345,7 @@
             remoteListings = remoteListings.filter(function (i) { return i.id !== listingId; });
             sbClient.from('reports').update({ status: 'resolved' }).eq('id', reportId).then(function () {}).catch(function () {});
             render();
-            renderAdminReportsList();
+            renderAdminReportsList(filterListingId);
           });
         });
       });
@@ -2588,12 +2703,16 @@
     });
 
     document.getElementById('grid').addEventListener('click', function (e) {
-      if (e.target.closest('[data-fav]') || e.target.closest('[data-edit]') || e.target.closest('[data-delete]') || e.target.closest('[data-renew]') || e.target.closest('[data-promote]') || e.target.closest('[data-compare]')) return;
+      if (e.target.closest('[data-fav]') || e.target.closest('[data-edit]') || e.target.closest('[data-delete]') || e.target.closest('[data-renew]') || e.target.closest('[data-promote]') || e.target.closest('[data-compare]') || e.target.closest('.admin-menu')) return;
       var row = e.target.closest('.feed-row');
       if (!row) return;
       var id = row.getAttribute('data-id');
       var item = allData().find(function (i) { return i.id === id; });
       if (item) openDetail(item);
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.admin-menu')) closeAdminMenus();
     });
 
     document.getElementById('grid').addEventListener('keydown', function (e) {
