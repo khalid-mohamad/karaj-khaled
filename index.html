@@ -1363,6 +1363,7 @@
   var SUPABASE_KEY = 'sb_publishable_t2GqMBWaZMp0XPalvdrcpw_JZQaI7-t';
   var sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
   var GITHUB_SITE_URL = 'https://khalid-mohamad.github.io/karaj-khaled/';
+  var PREVIEW_URL = 'https://karaj-khaled-preview.abusliman784.workers.dev/listing/';
   var IS_ARTIFACT_HOST = /claudeusercontent\.com$/.test(location.hostname);
   var currentUsername = null;
 
@@ -2440,6 +2441,14 @@
     });
   }
 
+  function openSharedListingFromHash() {
+    var hashMatch = location.hash.match(/^#listing-(.+)$/);
+    if (!hashMatch) return;
+    if (currentDetailItem && currentDetailItem.id === hashMatch[1]) return;
+    var sharedItem = allData().find(function (i) { return i.id === hashMatch[1]; });
+    if (sharedItem) openDetail(sharedItem);
+  }
+
   function openDetail(item) {
     currentDetailItem = item;
     incrementView(item);
@@ -2596,7 +2605,7 @@
     render();
 
     if (sbClient && !IS_ARTIFACT_HOST) {
-      syncRemoteData().then(function () { render(); });
+      syncRemoteData().then(function () { render(); openSharedListingFromHash(); });
       sbClient.auth.getSession().then(function (result) {
         var session = result.data && result.data.session;
         if (session && session.user) {
@@ -2770,8 +2779,12 @@
     }
 
     var shareBackdrop = document.getElementById('shareBackdrop');
+    function shareUrlForCurrentItem() {
+      if (!currentDetailItem) return GITHUB_SITE_URL;
+      return PREVIEW_URL + encodeURIComponent(currentDetailItem.id);
+    }
     document.getElementById('shareListingBtn').addEventListener('click', function () {
-      var url = location.href.split('#')[0] + '#listing-' + (currentDetailItem ? currentDetailItem.id : '');
+      var url = shareUrlForCurrentItem();
       var text = currentDetailItem ? currentDetailItem.title : 'كراج خالد';
       document.getElementById('shareWhatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(text + ' ' + url);
       document.getElementById('shareTelegram').href = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text);
@@ -2782,14 +2795,12 @@
     document.getElementById('shareWhatsapp').addEventListener('click', function () { shareBackdrop.hidden = true; });
     document.getElementById('shareTelegram').addEventListener('click', function () { shareBackdrop.hidden = true; });
     document.getElementById('shareInstagram').addEventListener('click', function () {
-      var url = location.href.split('#')[0] + '#listing-' + (currentDetailItem ? currentDetailItem.id : '');
-      copyShareLink(url);
+      copyShareLink(shareUrlForCurrentItem());
       shareBackdrop.hidden = true;
       showToast('انستغرام ما يدعم مشاركة روابط مباشرة، تم نسخ الرابط عشان تلصقه في الستوري أو البايو');
     });
     document.getElementById('copyShareLinkBtn').addEventListener('click', function () {
-      var url = location.href.split('#')[0] + '#listing-' + (currentDetailItem ? currentDetailItem.id : '');
-      copyShareLink(url);
+      copyShareLink(shareUrlForCurrentItem());
       shareBackdrop.hidden = true;
     });
 
@@ -3187,11 +3198,7 @@
       }
     });
 
-    var hashMatch = location.hash.match(/^#listing-(.+)$/);
-    if (hashMatch) {
-      var sharedItem = allData().find(function (i) { return i.id === hashMatch[1]; });
-      if (sharedItem) openDetail(sharedItem);
-    }
+    openSharedListingFromHash();
   });
 })();
 </script>
