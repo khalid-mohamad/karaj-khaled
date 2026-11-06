@@ -84,11 +84,16 @@
   input, select { font-family: inherit; }
   ::-webkit-scrollbar { height: 6px; }
 
+  /* ---------- Shared content-width cap (keeps every full-bleed bar's content aligned with .page-wrap) ---------- */
+  .bar-inner { max-width: 1180px; margin: 0 auto; }
+
   /* ---------- Utility bar (carries the brand) ---------- */
   .utilbar {
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark)); color: #fff; font-size: 0.76rem;
+  }
+  .utilbar .bar-inner {
     display: flex; align-items: center; justify-content: space-between;
     padding: 16px clamp(16px, 4vw, 40px);
-    background: linear-gradient(90deg, var(--primary), var(--primary-dark)); color: #fff; font-size: 0.76rem;
   }
   .utilbar a { opacity: 0.9; }
   .utilbar .u-left { display: flex; gap: 16px; }
@@ -109,10 +114,12 @@
   /* ---------- Topbar ---------- */
   .topbar {
     position: sticky; top: 0; z-index: 30;
-    display: flex; align-items: center; gap: 20px;
-    padding: 14px clamp(16px, 4vw, 40px);
     background: var(--bg);
     border-bottom: 1px solid var(--border);
+  }
+  .topbar .bar-inner {
+    display: flex; align-items: center; gap: 20px;
+    padding: 14px clamp(16px, 4vw, 40px);
   }
   .brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
   .brand-mark {
@@ -159,6 +166,7 @@
     display: flex; gap: 6px; overflow-x: auto;
     padding: 14px clamp(16px, 4vw, 40px) 10px;
     background: var(--bg);
+    max-width: 1180px; margin: 0 auto;
   }
   .cat-tile {
     display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0;
@@ -183,6 +191,7 @@
   }
   .section-label svg { width: 13px; height: 13px; }
   .brand-disclaimer { font-size: 0.68rem; color: var(--muted); line-height: 1.6; margin: -4px 0 10px; }
+  .brand-section { max-width: 1180px; margin: 0 auto; }
   .brand-strip {
     display: flex; flex-wrap: wrap; gap: 8px;
     padding: 0 clamp(16px, 4vw, 40px) 14px;
@@ -213,6 +222,7 @@
   .filters-row {
     display: flex; gap: 14px; flex-wrap: wrap;
     padding: 14px clamp(16px, 4vw, 40px); border-bottom: 1px solid var(--border);
+    max-width: 1180px; margin: 0 auto;
   }
   .filter-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 180px; min-width: 160px; }
   .filter-field label { font-size: 0.74rem; font-weight: 700; color: var(--muted); }
@@ -247,6 +257,7 @@
   .price-filter-row {
     display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
     padding: 14px clamp(16px, 4vw, 40px) 16px; border-bottom: 1px solid var(--border);
+    max-width: 1180px; margin: 0 auto;
   }
   .price-filter-label { font-size: 0.82rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
   .price-filter-row .price-inputs { flex: 0 1 260px; }
@@ -584,11 +595,14 @@
   }
 
   @media (max-width: 640px) {
-    .topbar { flex-wrap: wrap; }
+    .topbar .bar-inner { flex-wrap: wrap; }
     .searchbar { order: 3; max-width: none; width: 100%; }
-    .topbar-actions { margin-inline-start: 0; width: 100%; flex-wrap: wrap; gap: 8px; }
-    .topbar-actions .btn { flex: 1 1 auto; justify-content: center; padding: 9px 10px; font-size: 0.8rem; }
-    .topbar-actions #openAddBtn { flex-basis: 100%; order: -1; }
+    .topbar-actions {
+      margin-inline-start: 0; width: 100%;
+      display: grid; grid-template-columns: auto 1fr 1fr 1fr; align-items: center; gap: 8px;
+    }
+    .topbar-actions .btn { justify-content: center; padding: 9px 10px; font-size: 0.8rem; }
+    .topbar-actions #openAddBtn { grid-column: 1 / -1; order: -1; }
     .utilbar .u-left { display: none; }
   }
 </style>
@@ -596,25 +610,28 @@
 <div class="site" dir="rtl" lang="ar">
 
   <div class="utilbar">
-    <a class="brand" href="#" onclick="return false;">
-      <span class="brand-mark">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 16.5V13l1.6-4.2A2 2 0 0 1 7.5 7.5h9a2 2 0 0 1 1.9 1.3L20 13v3.5"></path>
-          <path d="M4 16.5h16v2.2a1 1 0 0 1-1 1h-1.4a1 1 0 0 1-1-1v-1.2H7.4v1.2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path>
-          <circle cx="7.6" cy="16.4" r="1.4"></circle>
-          <circle cx="16.4" cy="16.4" r="1.4"></circle>
-        </svg>
-      </span>
-      <span class="brand-name">كراج خالد<small>سوق السيارات والجوالات</small></span>
-    </a>
-    <div class="u-left">
-      <a href="#" onclick="return false;">حمّل التطبيق</a>
-      <a href="#" onclick="return false;">مركز المساعدة</a>
+    <div class="bar-inner">
+      <a class="brand" href="#" onclick="return false;">
+        <span class="brand-mark">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 16.5V13l1.6-4.2A2 2 0 0 1 7.5 7.5h9a2 2 0 0 1 1.9 1.3L20 13v3.5"></path>
+            <path d="M4 16.5h16v2.2a1 1 0 0 1-1 1h-1.4a1 1 0 0 1-1-1v-1.2H7.4v1.2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path>
+            <circle cx="7.6" cy="16.4" r="1.4"></circle>
+            <circle cx="16.4" cy="16.4" r="1.4"></circle>
+          </svg>
+        </span>
+        <span class="brand-name">كراج خالد<small>سوق السيارات والجوالات</small></span>
+      </a>
+      <div class="u-left">
+        <a href="#" onclick="return false;">حمّل التطبيق</a>
+        <a href="#" onclick="return false;">مركز المساعدة</a>
+      </div>
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="تبديل الوضع الليلي/النهاري"></button>
     </div>
-    <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="تبديل الوضع الليلي/النهاري"></button>
   </div>
 
   <header class="topbar">
+    <div class="bar-inner">
     <form class="searchbar" id="searchForm" onsubmit="return false;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted); flex-shrink:0;">
         <circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path>
@@ -634,6 +651,7 @@
       <button class="btn btn-ghost" type="button" id="viewMineBtn">إعلاناتي</button>
       <button class="btn btn-ghost" type="button" id="authBtn">دخول</button>
       <button class="btn btn-cta" type="button" id="openAddBtn">+ أضف إعلان</button>
+    </div>
     </div>
   </header>
 
@@ -668,12 +686,14 @@
     </button>
   </nav>
 
-  <div class="section-label" style="padding:14px clamp(16px,4vw,40px) 0;">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>
-    تصفح حسب الماركة
+  <div class="brand-section">
+    <div class="section-label" style="padding:14px clamp(16px,4vw,40px) 0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>
+      تصفح حسب الماركة
+    </div>
+    <p class="brand-disclaimer" style="padding:0 clamp(16px,4vw,40px);">الأسماء هنا لأغراض التصنيف والبحث فقط، ولا تعني أي شراكة أو ارتباط رسمي بالشركات المصنّعة.</p>
+    <div class="brand-strip" id="brandStrip"></div>
   </div>
-  <p class="brand-disclaimer" style="padding:0 clamp(16px,4vw,40px);">الأسماء هنا لأغراض التصنيف والبحث فقط، ولا تعني أي شراكة أو ارتباط رسمي بالشركات المصنّعة.</p>
-  <div class="brand-strip" id="brandStrip"></div>
 
   <div class="filters-row">
     <div class="filter-field">
@@ -2849,7 +2869,8 @@
       }
       sbClient.auth.updateUser({ password: newPass }).then(function (result) {
         if (result.error) {
-          note.textContent = result.error.message || 'تعذّر تغيير كلمة المرور.';
+          var msg = result.error.message || '';
+          note.textContent = /fetch|network/i.test(msg) ? 'تعذّر الاتصال بالخادم، تحقق من الإنترنت أو حاول لاحقًا.' : (msg || 'تعذّر تغيير كلمة المرور.');
           return;
         }
         passwordBackdrop.hidden = true;
@@ -2937,6 +2958,8 @@
             note.textContent = 'اسم المستخدم موجود مسبقًا، جرّب اسم آخر أو سجّل الدخول.';
           } else if (authMode === 'login' && /credentials|invalid/i.test(msg)) {
             note.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+          } else if (/fetch|network/i.test(msg)) {
+            note.textContent = 'تعذّر الاتصال بالخادم، تحقق من الإنترنت أو حاول لاحقًا.';
           } else {
             note.textContent = msg || 'حدث خطأ غير متوقع، حاول مرة أخرى.';
           }
