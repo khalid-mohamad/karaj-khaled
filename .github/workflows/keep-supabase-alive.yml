@@ -1,7 +1,7 @@
 name: Keep Supabase Alive
 on:
   schedule:
-    - cron: '0 6 * * 0,4'
+    - cron: '0 6 * * *'
   workflow_dispatch: {}
 jobs:
   ping:
@@ -9,4 +9,4 @@ jobs:
     steps:
       - name: Ping Supabase REST API
         run: |
-          curl -s -o /dev/null -w "status=%{http_code}\n" "https://rqailwsjdhsmkajkvkpn.supabase.co/rest/v1/listings?select=id&limit=1" -H "apikey: sb_publishable_t2GqMBWaZMp0XPalvdrcpw_JZQaI7-t"
+          curl -s --retry 2 -o /dev/null -w "status=%{http_code}\n" "https://rqailwsjdhsmkajkvkpn.supabase.co/rest/v1/listings?select=id&limit=1" -H "apikey: sb_publishable_t2GqMBWaZMp0XPalvdrcpw_JZQaI7-t"
