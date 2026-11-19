@@ -830,6 +830,10 @@
           <input id="f-city" type="text" placeholder="مثال: الرياض" required>
         </div>
         <div class="field">
+          <label for="f-phone">رقم الجوال للتواصل عبر واتساب (اختياري)</label>
+          <input id="f-phone" type="tel" placeholder="مثال: 05xxxxxxxx" inputmode="tel" pattern="^(05\d{8}|5\d{8})$" title="اكتب رقم جوال سعودي صحيح، مثال: 0512345678">
+        </div>
+        <div class="field">
           <label for="f-desc">الوصف (اختياري)</label>
           <textarea id="f-desc" rows="3" placeholder="اكتب تفاصيل إضافية عن الإعلان..."></textarea>
         </div>
@@ -1314,12 +1318,43 @@
     { id: 's125', cat: 'plates', plateType: 'تجاري', title: 'لوحة تجاري بأرقام خماسية', brand: '', price: 9500, city: 'جدة', time: 'قبل 3 أيام', seller: 'محل اللوحات المميزة', desc: 'لوحة تجاري بأرقام خماسية متسلسلة، مناسبة للمحلات والمعارض التجارية.', specs: ['النوع: تجاري', 'الأرقام: خماسية', 'قابلة للتفاوض'] },
     { id: 's126', cat: 'plates', plateType: 'نقل', title: 'لوحة نقل بحروف مميزة', brand: '', price: 4200, city: 'الدمام', time: 'قبل 5 أيام', seller: 'سوق اللوحات', desc: 'لوحة نقل بحروف مميزة سهلة الحفظ، تحويل ملكية سريع لأصحاب الشاحنات.', specs: ['النوع: نقل', 'الحروف: مميزة', 'قابلة للتفاوض'] },
     { id: 's127', cat: 'plates', plateType: 'خصوصي', title: 'لوحة خصوصي رقم واحد نادر', brand: '', price: 120000, city: 'مكة', time: 'قبل أسبوع', seller: 'محل اللوحات المميزة', desc: 'لوحة خصوصي برقم واحد فقط، من أندر اللوحات وأكثرها طلبًا بين الهواة والمقتنين.', specs: ['النوع: خصوصي', 'الأرقام: رقم واحد', 'قابلة للتفاوض'] },
-    { id: 's128', cat: 'plates', plateType: 'تجاري', title: 'لوحة تجاري بأرقام متطابقة', brand: '', price: 16500, city: 'بريدة', time: 'قبل 10 أيام', seller: 'سوق اللوحات', desc: 'لوحة تجاري بأرقام متطابقة، شكل مرتب وسهل الحفظ، مناسبة للشركات الصغيرة.', specs: ['النوع: تجاري', 'الأرقام: متطابقة', 'قابلة للتفاوض'] }
+    { id: 's128', cat: 'plates', plateType: 'تجاري', title: 'لوحة تجاري بأرقام متطابقة', brand: '', price: 16500, city: 'بريدة', time: 'قبل 10 أيام', seller: 'سوق اللوحات', desc: 'لوحة تجاري بأرقام متطابقة، شكل مرتب وسهل الحفظ، مناسبة للشركات الصغيرة.', specs: ['النوع: تجاري', 'الأرقام: متطابقة', 'قابلة للتفاوض'] },
+    { id: 's129', cat: 'car', year: 2023, title: 'نيسان التيما 2023 فل كامل', brand: 'نيسان', price: 78000, city: 'جدة', time: 'قبل 10 دقائق', seller: 'عبدالرحمن القحطاني', photos: [PHOTOS.sedan2], desc: 'نيسان التيما 2023 فل كامل، صيانة وكيل، لا حوادث، سيارة نظيفة جدًا ومستخدمة استخدام شخصي خفيف.', specs: ['الموديل: 2023', 'الممشى: 12,000 كم', 'ناقل الحركة: أوتوماتيك', 'الوقود: بنزين', 'الحالة: ممتازة'] },
+    { id: 's130', cat: 'car', year: 2021, title: 'فورد اكسبلورر 2021 دبل', brand: 'فورد', price: 125000, city: 'الرياض', time: 'قبل 35 دقيقة', seller: 'فهد المطيري', photos: [PHOTOS.s10_bmwx5], desc: 'فورد اكسبلورر 2021 دبل، فحص كامل، سبع مقاعد، جميع الإضافات شغالة بدون أي ملاحظات.', specs: ['الموديل: 2021', 'الممشى: 45,000 كم', 'ناقل الحركة: أوتوماتيك', 'الوقود: بنزين', 'الحالة: ممتازة'] },
+    { id: 's131', cat: 'car', year: 2022, title: 'كيا سورينتو 2022 فل كامل', brand: 'كيا', price: 98000, city: 'الدمام', time: 'قبل ساعة', seller: 'بدر العتيبي', photos: [PHOTOS.s12_tahoe], desc: 'كيا سورينتو 2022 فل كامل وارد الوكالة، صيانة دورية منتظمة، سيارة عائلية واسعة واقتصادية.', specs: ['الموديل: 2022', 'الممشى: 28,000 كم', 'ناقل الحركة: أوتوماتيك', 'الوقود: بنزين', 'الحالة: ممتازة'] },
+    { id: 's132', cat: 'car', year: 2020, title: 'هيونداي سوناتا 2020', brand: 'هيونداي', price: 52000, city: 'مكة', time: 'قبل ساعتين', seller: 'أم ياسر', photos: [PHOTOS.s1_camry], desc: 'هيونداي سوناتا 2020 من المالك الأول، اقتصادية بالوقود ومريحة للاستخدام اليومي داخل المدينة.', specs: ['الموديل: 2020', 'الممشى: 63,000 كم', 'ناقل الحركة: أوتوماتيك', 'الوقود: بنزين', 'الحالة: جيدة جدًا'] },
+    { id: 's133', cat: 'car', year: 2019, title: 'شيفروليه تاهو 2019', brand: 'شيفروليه', price: 110000, city: 'حائل', time: 'قبل 3 ساعات', seller: 'تركي الشمري', photos: [PHOTOS.s3_yukon], desc: 'شيفروليه تاهو 2019 دبل فل، ماشي قليل، مقاعد جلد وفتحة سقف، فحص كامل متوفر عند الجدية.', specs: ['الموديل: 2019', 'الممشى: 71,000 كم', 'ناقل الحركة: أوتوماتيك', 'الوقود: بنزين', 'الحالة: ممتازة'] },
+    { id: 's134', cat: 'car', year: 2021, title: 'مرسيدس C200 2021 وارد الوكالة', brand: 'مرسيدس', price: 165000, city: 'الخبر', time: 'قبل 5 ساعات', seller: 'م. سلطان العمري', photos: [PHOTOS.s5_lexus], desc: 'مرسيدس C200 2021 وارد الوكالة، صيانة وكيل بالكامل، سيارة فخمة بحالة الوكالة تقريبًا.', specs: ['الموديل: 2021', 'الممشى: 31,000 كم', 'ناقل الحركة: أوتوماتيك', 'الوقود: بنزين', 'الحالة: ممتازة'] },
+    { id: 's135', cat: 'car', year: 2020, title: 'تويوتا هايلكس 2020 دبل', brand: 'تويوتا', price: 95000, city: 'الطائف', time: 'قبل 6 ساعات', seller: 'سعيد الحارثي', photos: [PHOTOS.s6_f150], desc: 'تويوتا هايلكس 2020 دبل كابينة، صيانة وكيل، مناسبة للاستخدام الشخصي والبر، حالة ممتازة.', specs: ['الموديل: 2020', 'الممشى: 58,000 كم', 'ناقل الحركة: أوتوماتيك', 'الوقود: ديزل', 'الحالة: ممتازة'] },
+    { id: 's136', cat: 'car', year: 2017, title: 'جي ام سي يوكن دينالي 2017', brand: 'جي ام سي', price: 115000, city: 'بريدة', time: 'قبل 8 ساعات', seller: 'ماجد الدوسري', photos: [PHOTOS.s8_patrol], desc: 'جي ام سي يوكن دينالي 2017 فل كامل، جميع الإضافات شغالة، كاميرات محيطية ومقاعد مكهربة.', specs: ['الموديل: 2017', 'الممشى: 89,000 كم', 'ناقل الحركة: أوتوماتيك', 'الوقود: بنزين', 'الحالة: جيدة جدًا'] },
+    { id: 's137', cat: 'phone', title: 'سامسونج Z Flip5 مستعمل نظيف', brand: 'Samsung', price: 2800, city: 'الرياض', time: 'قبل 20 دقيقة', seller: 'رهف السبيعي', photos: [PHOTOS.s11_zfold], desc: 'سامسونج Z Flip5 مستعمل استخدام خفيف، بدون خدوش، البطارية بصحة ممتازة، يشمل العلبة الأصلية.', specs: ['السعة: 256GB', 'اللون: كريمي', 'صحة البطارية: 92%', 'الحالة: ممتازة'] },
+    { id: 's138', cat: 'phone', title: 'شاومي 13 برو 256GB', brand: 'Xiaomi', price: 2100, city: 'جدة', time: 'قبل 40 دقيقة', seller: 'عمر الزهراني', photos: [PHOTOS.s9_xiaomi], desc: 'شاومي 13 برو 256 جيجا، كاميرا ممتازة وأداء قوي، استخدام نظيف بدون أي مشاكل.', specs: ['السعة: 256GB', 'اللون: أسود', 'الحالة: ممتازة', 'يشمل الكرتون والشاحن الأصلي'] },
+    { id: 's139', cat: 'phone', title: 'آيفون 14 برو 128GB', brand: 'Apple', price: 3400, city: 'الدمام', time: 'قبل ساعة', seller: 'لجين القرني', photos: [PHOTOS.s2_iphone15], desc: 'آيفون 14 برو 128 جيجا، بنفسجي، بدون خدوش، البطارية بصحة 96%، يشمل جميع الملحقات.', specs: ['السعة: 128GB', 'اللون: بنفسجي', 'صحة البطارية: 96%', 'الحالة: كالجديد'] },
+    { id: 's140', cat: 'accessories', title: 'كفرات مقاعد جلد فاخرة لكامري', brand: 'تويوتا', price: 650, city: 'مكة', time: 'قبل 12 دقيقة', seller: 'محل اكسسوارات السيارات', photos: [PHOTOS.s1_camry], desc: 'طقم كفرات جلد فاخرة تناسب تويوتا كامري، تركيب سهل ومقاسات مضبوطة تمامًا.', specs: ['المادة: جلد صناعي فاخر', 'يناسب: كامري 2018-2023', 'الحالة: جديد'] },
+    { id: 's141', cat: 'accessories', title: 'شاحن سامسونج أصلي سريع 45W', brand: 'Samsung', price: 85, city: 'الخبر', time: 'قبل 50 دقيقة', seller: 'متجر الجوالات الذكية', photos: [PHOTOS.phonesgroup1], desc: 'شاحن سامسونج أصلي 45 واط سريع، جديد بالكرتون، متوافق مع جميع أجهزة سامسونج الحديثة.', specs: ['القوة: 45W', 'الحالة: جديد', 'النوع: أصلي'] },
+    { id: 's142', cat: 'accessories', title: 'سماعات بلوتوث رياضية مقاومة للماء', brand: '', price: 120, city: 'حائل', time: 'قبل ساعتين', seller: 'متجر الجوالات الذكية', photos: [PHOTOS.phonesgroup1], desc: 'سماعات بلوتوث رياضية مقاومة للعرق والماء، بطارية تدوم طويلًا، صوت واضح ومناسبة للتمارين.', specs: ['البطارية: حتى 8 ساعات', 'المقاومة: IPX5', 'الحالة: جديد'] },
+    { id: 's143', cat: 'plates', plateType: 'خصوصي', title: 'لوحة خصوصي مميزة أرقام رباعية', brand: '', price: 18000, city: 'الرياض', time: 'قبل 30 دقيقة', seller: 'سوق اللوحات', desc: 'لوحة خصوصي أرقام رباعية سهلة الحفظ، تحويل ملكية فوري لدى المرور عند الاتفاق.', specs: ['النوع: خصوصي', 'الأرقام: رباعية', 'قابلة للتفاوض'] },
+    { id: 's144', cat: 'plates', plateType: 'تجاري', title: 'لوحة تجاري مميزة', brand: '', price: 9000, city: 'جدة', time: 'قبل ساعة', seller: 'سوق اللوحات', desc: 'لوحة تجاري مميزة تناسب المنشآت والمحلات، نقل ملكية سريع عند الجدية.', specs: ['النوع: تجاري', 'قابلة للتفاوض'] },
+    { id: 's145', cat: 'plates', plateType: 'نقل', title: 'لوحة نقل مميزة', brand: '', price: 6000, city: 'الدمام', time: 'قبل 4 ساعات', seller: 'سوق اللوحات', desc: 'لوحة نقل مميزة بحالة ممتازة، مناسبة لأصحاب الشاحنات وسيارات النقل التجاري.', specs: ['النوع: نقل', 'قابلة للتفاوض'] },
+    { id: 's146', cat: 'realestate', rooms: 3, title: 'شقة 3 غرف للإيجار حي الشهداء', brand: '', price: 28000, city: 'الطائف', time: 'قبل ساعتين', seller: 'عقارات الواحة', desc: 'شقة عوائل بتشطيب ممتاز في حي الشهداء، قريبة من الخدمات، مدخل خاص وموقف سيارة.', specs: ['المساحة: 130م²', 'عدد الغرف: 3', 'الدور: 1', 'العقد: سنوي'] },
+    { id: 's147', cat: 'realestate', rooms: 5, title: 'فيلا دوبلكس للبيع 5 غرف', brand: '', price: 980000, city: 'بريدة', time: 'قبل 5 ساعات', seller: 'عقارات الواحة', desc: 'فيلا دوبلكس جديدة للبيع، تشطيب سوبر لوكس، موقع مميز وقريبة من الطريق الرئيسي.', specs: ['المساحة: 400م²', 'عدد الغرف: 5', 'الأدوار: 2', 'الحالة: جديدة'] },
+    { id: 's148', cat: 'carparts', title: 'طقم فرامل أصلي لتويوتا كامري', brand: 'تويوتا', price: 450, city: 'المدينة', time: 'قبل 7 ساعات', seller: 'محل قطع الغيار الأول', photos: [PHOTOS.s1_camry], desc: 'طقم فرامل أمامي أصلي يناسب تويوتا كامري، جديد لم يُركّب، ضمان الوكيل.', specs: ['يناسب: كامري 2018-2023', 'الحالة: جديد', 'النوع: أصلي'] },
   ];
 
   var CITIES = ['الرياض', 'جدة', 'مكة', 'الدمام', 'الخبر', 'الطائف', 'بريدة', 'حائل', 'المدينة'];
   var CONTACT_PHONE_INTL = '966547203707';
   var CONTACT_PHONE_TEL = '+966547203707';
+  function normalizePhoneIntl(raw) {
+    var digits = (raw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.indexOf('966') === 0) return digits;
+    if (digits.indexOf('0') === 0) return '966' + digits.slice(1);
+    if (digits.length === 9) return '966' + digits;
+    return digits;
+  }
+  function sellerPhoneFor(item) {
+    return (item && item.phone) ? item.phone : CONTACT_PHONE_INTL;
+  }
   var BRANDS = ['تويوتا', 'نيسان', 'فورد', 'لكزس', 'بي ام دبليو', 'جي ام سي', 'شيفروليه', 'هيونداي', 'كيا', 'مرسيدس', 'هوندا', 'مازدا', 'جيب', 'رنج روفر', 'أودي', 'ميتسوبيشي', 'دودج', 'Apple', 'Samsung', 'Xiaomi', 'Huawei'];
   var CAT_LABELS = { car: 'سيارة', phone: 'جوال', carparts: 'قطعة غيار', accessories: 'إكسسوار', realestate: 'عقار', plates: 'لوحة مميزة' };
   var STATUS_LABELS = { urgent: 'عاجل', reserved: 'محجوز', sold: 'مباع' };
@@ -1402,7 +1437,7 @@
     return {
       id: row.id, remote: true, ownerId: row.owner_id, cat: row.cat, title: row.title,
       brand: row.brand, price: row.price, city: row.city, desc: row.description,
-      seller: row.seller, photos: row.photos || [], specs: row.specs || [],
+      seller: row.seller, phone: row.phone || '', photos: row.photos || [], specs: row.specs || [],
       rooms: row.rooms, plateType: row.plate_type, status: row.status,
       featuredUntil: row.featured_until, createdAt: row.created_at, time: 'الآن'
     };
@@ -1411,7 +1446,7 @@
     return {
       id: item.id, owner_id: ownerId, cat: item.cat, title: item.title, brand: item.brand,
       price: item.price, city: item.city, description: item.desc, seller: item.seller,
-      photos: item.photos || [], specs: item.specs || [], rooms: item.rooms || null,
+      phone: item.phone || null, photos: item.photos || [], specs: item.specs || [], rooms: item.rooms || null,
       plate_type: item.plateType || null, status: item.status || null,
       featured_until: item.featuredUntil || null, created_at: item.createdAt
     };
@@ -2230,6 +2265,7 @@
     document.getElementById('f-brand').value = item.brand || '';
     document.getElementById('f-price').value = item.price || '';
     document.getElementById('f-city').value = item.city || '';
+    document.getElementById('f-phone').value = item.phone ? '0' + item.phone.replace(/^966/, '') : '';
     document.getElementById('f-desc').value = item.desc || '';
     pendingPhotos = (item.photos || []).slice();
     renderPhotoPreview();
@@ -2465,7 +2501,7 @@
     document.getElementById('detailSeller').innerHTML = item.seller + (isTrustedSeller(item.seller) ? ' <span class="trusted-badge">' + CHECK_BADGE_SVG + 'موثوق</span>' : '');
     document.getElementById('sellerAvatar').textContent = item.seller.trim().charAt(0);
     document.getElementById('callSellerBtn').href = 'tel:' + CONTACT_PHONE_TEL;
-    document.getElementById('whatsappSellerBtn').href = 'https://wa.me/' + CONTACT_PHONE_INTL + '?text=' + encodeURIComponent('السلام عليكم، أنا مهتم بإعلانك: ' + item.title);
+    document.getElementById('whatsappSellerBtn').href = 'https://wa.me/' + sellerPhoneFor(item) + '?text=' + encodeURIComponent('السلام عليكم، أنا مهتم بإعلانك: ' + item.title);
 
     detailGalleryPhotos = (item.photos && item.photos.length) ? item.photos : [];
     detailGalleryIndex = 0;
@@ -3000,7 +3036,7 @@
       e.preventDefault();
       var val = document.getElementById('messageInput').value.trim();
       if (!val) return;
-      var waUrl = 'https://wa.me/' + CONTACT_PHONE_INTL + '?text=' + encodeURIComponent(val);
+      var waUrl = 'https://wa.me/' + sellerPhoneFor(currentDetailItem) + '?text=' + encodeURIComponent(val);
       window.open(waUrl, '_blank');
       e.target.reset();
       detailBackdrop.hidden = true;
@@ -3029,6 +3065,7 @@
         brand: document.getElementById('f-brand').value.trim(),
         price: Number(document.getElementById('f-price').value) || 0,
         city: document.getElementById('f-city').value.trim(),
+        phone: normalizePhoneIntl(document.getElementById('f-phone').value),
         desc: document.getElementById('f-desc').value.trim(),
         photos: pendingPhotos.slice()
       };
@@ -3059,7 +3096,7 @@
         var existingLocal = userListings.find(function (i) { return i.id === editId; });
         if (existingLocal) {
           existingLocal.cat = data.cat; existingLocal.title = data.title; existingLocal.brand = data.brand;
-          existingLocal.price = data.price; existingLocal.city = data.city; existingLocal.desc = data.desc; existingLocal.photos = data.photos;
+          existingLocal.price = data.price; existingLocal.city = data.city; existingLocal.phone = data.phone; existingLocal.desc = data.desc; existingLocal.photos = data.photos;
           saveListings();
         }
         finishSubmit('تم حفظ التعديلات');
