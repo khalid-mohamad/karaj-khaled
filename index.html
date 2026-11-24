@@ -1150,6 +1150,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
+<script src="config.local.js" onerror="void 0"></script>
 <script>
 (function () {
   var PHOTOS = {
@@ -1394,8 +1395,8 @@
     try { localStorage.setItem('kg_favorites', JSON.stringify(state.favs)); } catch (e) {}
   }
 
-  var SUPABASE_URL = 'https://rqailwsjdhsmkajkvkpn.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_t2GqMBWaZMp0XPalvdrcpw_JZQaI7-t';
+  var SUPABASE_URL = window.KARAJ_CONFIG_OVERRIDE ? window.KARAJ_CONFIG_OVERRIDE.SUPABASE_URL : 'https://rqailwsjdhsmkajkvkpn.supabase.co';
+  var SUPABASE_KEY = window.KARAJ_CONFIG_OVERRIDE ? window.KARAJ_CONFIG_OVERRIDE.SUPABASE_KEY : 'sb_publishable_t2GqMBWaZMp0XPalvdrcpw_JZQaI7-t';
   var sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
   var GITHUB_SITE_URL = 'https://khalid-mohamad.github.io/karaj-khaled/';
   var PREVIEW_URL = 'https://karaj-khaled-preview.abusliman784.workers.dev/listing/';

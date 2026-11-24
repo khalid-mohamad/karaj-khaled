@@ -1,0 +1,13 @@
+// Copy this file to config.local.js (gitignored, never committed) to point your
+// local copy of index.html at the STAGING Supabase project instead of production.
+// Never commit real staging/production keys into a tracked file.
+//
+// cp config.local.js.example config.local.js
+// then fill in the staging project's URL/key below, and serve index.html locally
+// (e.g. `python3 -m http.server`). Production (GitHub Pages) never has this file,
+// so it always falls back to the hardcoded production constants in index.html.
+
+window.KARAJ_CONFIG_OVERRIDE = {
+  SUPABASE_URL: 'https://YOUR-STAGING-PROJECT.supabase.co',
+  SUPABASE_KEY: 'sb_publishable_YOUR_STAGING_KEY'
+};
