@@ -45,23 +45,27 @@ git commit -m "describe the change"
 git push
 ```
 
-## Staging vs. production (local testing only for now)
+## Staging vs. production
+
+A separate Supabase project, **karaj-khaled-staging** (region eu-central-1, matching production), exists specifically so local testing never has to touch real production data again. Its full schema lives in [`supabase/schema.sql`](supabase/schema.sql) — extracted verbatim from production via SQL introspection (tables, RLS policies, RPC functions, triggers, storage bucket config, role grants) and applied to staging, so the two projects are an exact structural match. This is also the first time the schema has existed as a file at all, rather than only as live production state.
 
 `index.html` loads an optional `config.local.js` (gitignored, never committed — see `config.local.js.example`) right before the main script. If present, it overrides `SUPABASE_URL`/`SUPABASE_KEY` for your local copy only; production (GitHub Pages) never has this file, so it always falls back to the real production constants hardcoded in `index.html`.
 
 ```bash
 cp config.local.js.example config.local.js
-# edit config.local.js with the staging project's URL/key
+# fill in the staging project's URL/key (ask whoever holds the Supabase account)
 python3 -m http.server   # serve locally — now talking to staging, not production
 ```
 
-This means local testing can already point at a separate Supabase project instead of touching production data. **The staging Supabase project itself still needs to be created** (requires logging into the Supabase dashboard) — until then, `config.local.js` has nowhere real to point yet.
+`scripts/smoke_test.py` automatically picks up `config.local.js` the same way, so running it locally exercises staging, not production.
+
+**Setting up a brand-new Supabase project from this file:** paste `supabase/schema.sql` into the new project's SQL Editor and run it top to bottom, then turn off Authentication → Sign In/Providers → "Confirm email" (production has it off, since usernames map to synthetic `@karajkhaled.local` addresses with no real inbox). One real gotcha hit setting up staging this way: a project created while Supabase's own status page was reporting a live platform incident came up missing its standard `anon`/`authenticated` table grants entirely (RLS policies alone don't matter without them — every request 401s) — `schema.sql` now grants these explicitly so this can't silently recur.
 
 ## Known gaps / next steps
 
-- **Staging Supabase project not created yet** — the config-override mechanism above is ready, but needs an actual second Supabase project to point at.
 - **Cloudflare Worker is deployed manually**, not tracked in this repo. Its source should eventually live here too.
 - **No hosted staging URL** — staging is local-only (`config.local.js` + `python3 -m http.server`) for now. A real staging deployment (e.g. a second GitHub Pages repo, or Cloudflare Pages preview branches) is future work if that becomes worth the complexity.
+- **`supabase/schema.sql` is not auto-applied** — it's a reference/bootstrap file, not a migration runner. If the production schema changes, this file needs a manual update to stay in sync (there's no CI check enforcing that yet).
 
 ## External accounts this project depends on
 
